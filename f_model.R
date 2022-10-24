@@ -45,6 +45,7 @@ f_model <- function(raw_file = raw_file,
   
   obj$rep <- obj$report()
   
-  
+  return(list(obj = obj,
+              opt = opt))
 }
 
