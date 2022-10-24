@@ -24,6 +24,12 @@ template<class Type>
   DATA_INTEGER(j_flag);
   DATA_INTEGER(l_flag);
   DATA_INTEGER(t_flag);
+  
+  DATA_INTEGER(t_bypass);
+  DATA_INTEGER(j_bypass);
+  DATA_INTEGER(l_bypass);
+  DATA_INTEGER(jl_bypass);
+  
   DATA_INTEGER(z_jl_flag);
   DATA_INTEGER(z_jlt_flag);
   DATA_INTEGER(sim); //The data likelihood
@@ -134,8 +140,16 @@ template<class Type>
   MVNORM_t<Type> jl_dnorm(jl_cov); 
   if(z_jlt_flag==1){
     for(int t=0; t<n_t; t++){
-      // nll(2) += GMRF(Q_jl)(z_jlt.col(t));
-      nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
+      if(jl_bypass == 0){
+        // vector<Type> tmp_z(n_s_jl);
+        // for(int i = 0; i < n_s_jl; i++){
+        //   tmp_z(i) = z_jlt(i,0,t);
+        // }
+        nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
+      }
+      if(jl_bypass == 1){
+        nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
+      }
       // ln_zexp_sp_jlt.col(t) = z_jlt.col(t)/tau_jl2;
     }
     // jnll_pointer += SCALE(SEPARABLE(MVNORM(Cov_cc), gmrf_Q), exp(-logtau))( diff_gmrf_sc );
@@ -159,7 +173,12 @@ template<class Type>
   y_cov(1,0) = psi_y * sig_y * sig_y;
   MVNORM_t<Type> y_dnorm(y_cov); 
   if(t_flag==1){
-    nll(3) += AR1(phi_y,y_dnorm)(y_re.transpose());
+    if(t_bypass == 1){
+      nll(3) += AR1(phi_y,y_dnorm)(y_re.transpose());
+    }
+    if(t_bypass == 0){
+      nll(3) += SCALE(AR1(phi_y),sig_y)(y_re.col(0));
+    }
   }   
   
   matrix<Type> l_cov(2,2);
@@ -169,7 +188,12 @@ template<class Type>
   l_cov(1,0) = psi_l * sig_l * sig_l;
   MVNORM_t<Type> l_dnorm(l_cov); 
   if(l_flag==1){
-    nll(4) += AR1(phi_l,l_dnorm)(l_re.transpose());
+    if(l_bypass == 1){
+      nll(4) += AR1(phi_l,l_dnorm)(l_re.transpose());
+    }
+    if(l_bypass == 0){
+      nll(4) += SCALE(AR1(phi_l),sig_l)(l_re.col(0));
+    }
   }
   
   
@@ -180,7 +204,12 @@ template<class Type>
   j_cov(1,0) = psi_j * sig_j * sig_j;
   MVNORM_t<Type> j_dnorm(j_cov); 
   if(j_flag==1){
-    nll(5) += AR1(phi_j,j_dnorm)(j_re.transpose());
+    if(j_bypass == 1){
+      nll(5) += AR1(phi_j,j_dnorm)(j_re.transpose());
+    }
+    if(j_bypass == 0){
+      nll(5) += SCALE(AR1(phi_j),sig_j)(j_re.col(0));
+    }
   }
   
   vector<Type> nu_i(n_i);
@@ -210,14 +239,15 @@ template<class Type>
   // array<Type> proj_ef(n_i,4,9);
   
   for(int i=0; i<n_i; i++){
+
     eta_i(i) =  mu +
       bypass * a_i(i) +
-      y_re(t_i(i),a_i(i)) +
-      l_re(l_i(i),a_i(i)) +
-      j_re(j_i(i),a_i(i)) +
+      y_re(t_i(i) , a_i(i) * t_bypass) +
+      l_re(l_i(i) , a_i(i) * l_bypass) +
+      j_re(j_i(i) , a_i(i) * j_bypass) +
       ln_zexp_sp_jl(x_s_jl(s_i_jl(i))) +  //day X length
       // ln_zexp_sp_jlt(x_s_jl(s_i_jl(i)),t_i(i)); //day X length X year
-      z_jlt(x_s_jl(s_i_jl(i)), a_i(i), t_i(i)); //day X length X year
+      z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jl_bypass, t_i(i)); //day X length X year
       
     // for(int jj = 0; jj<9;jj++){
       // tmp(i,jj) = mu +
