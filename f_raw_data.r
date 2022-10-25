@@ -16,7 +16,7 @@ f_raw_data <- function(file = "C:/NOAA/LARGE_data/chin_survival_1998_2019_subset
     group_by(l,j,y,s,a) %>%  #get rid of diff column
     summarise(ns = sum(s), nt = length(s)) %>% #survivors and sample size
     filter(!(a == 0 & (l < rangeL[1] | l > rangeL[2] ))) %>% #remove bad dam fish
-    filter(!(a == 1 & (l < rangeL[1] | l > 180 ))) %>% #remove bad fish above dam
+    filter(!(a == 1 & (l < rangeL[1] | l > rangeL[2] ))) %>% #remove bad fish above dam
     filter(!(j < rangeJ[1] | j > rangeJ[2] )) #remove bad days
     
   return(x)

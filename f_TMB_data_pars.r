@@ -2,6 +2,7 @@ f_TMB_data_pars <- function(df = 0,
                             mesh = 0,
                             rangeL = 0,
                             rangeJ = 0,
+                            AR_flags = 0,
                             by_pass = 0,
                             H_flag = 0,
                             b_flags = 0,
@@ -12,6 +13,9 @@ f_TMB_data_pars <- function(df = 0,
   
   data <- list(n_i = length(df$s)
                ,a_i = df$a
+               ,t_AR = AR_flags["t_AR"]
+               ,l_AR = AR_flags["l_AR"]
+               ,j_AR = AR_flags["j_AR"]
                ,mu_bypass = b_flags['mu_bypass']
                ,t_bypass = b_flags['t_bypass']
                ,j_bypass = b_flags['j_bypass']

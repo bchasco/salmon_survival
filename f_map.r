@@ -11,6 +11,10 @@ f_map <- function(TMBlist = TMB_list){
     map <- append(map,
                   list(f_psiy = as.factor(NA)))
   }
+  if(TMBlist$data$t_AR==0){
+    map <- append(map,
+                  list(f_phiy = as.factor(NA)))
+  }
   if(TMBlist$data$t_flag==0){
     map <- append(map,
                   list(
@@ -26,6 +30,10 @@ f_map <- function(TMBlist = TMB_list){
     map <- append(map,
                   list(f_psij = as.factor(NA)))
   }
+  if(TMBlist$data$j_AR==0){
+    map <- append(map,
+                  list(f_phij = as.factor(NA)))
+  }
   if(TMBlist$data$j_flag==0){
     map <- append(map,
                   list(
@@ -40,6 +48,10 @@ f_map <- function(TMBlist = TMB_list){
   if(TMBlist$data$l_bypass==0){
     map <- append(map,
                   list(f_psil = as.factor(NA)))
+  }
+  if(TMBlist$data$l_AR==0){
+    map <- append(map,
+                  list(f_phil = as.factor(NA)))
   }
   if(TMBlist$data$l_flag==0){
     map <- append(map,

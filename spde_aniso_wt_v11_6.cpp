@@ -29,6 +29,10 @@ template<class Type>
   DATA_INTEGER(j_bypass);
   DATA_INTEGER(l_bypass);
   DATA_INTEGER(jlt_bypass);
+
+  DATA_INTEGER(t_AR);
+  DATA_INTEGER(j_AR);
+  DATA_INTEGER(l_AR);
   
   DATA_INTEGER(jlt_flag);
   DATA_INTEGER( n_i );         // Total number of observations
@@ -124,14 +128,28 @@ template<class Type>
   y_cov(1,1) = sig_y * sig_y;
   y_cov(0,1) = psi_y * sig_y * sig_y;
   y_cov(1,0) = psi_y * sig_y * sig_y;
-  MVNORM_t<Type> y_dnorm(y_cov); 
   if(t_flag==1){
-    if(t_bypass == 1){
-      nll(3) += AR1(phi_y,y_dnorm)(y_re.transpose());
+    if(t_AR == 1){
+      if(t_bypass == 1){
+        nll(3) += AR1(phi_y,MVNORM(y_cov))(y_re.transpose());
+      }
+      if(t_bypass == 0){
+        nll(3) += SCALE(AR1(phi_y),sig_y)(y_re.col(0));
+      }
     }
-    if(t_bypass == 0){
-      nll(3) += SCALE(AR1(phi_y),sig_y)(y_re.col(0));
+    if(t_AR == 0){
+      if(t_bypass == 1){
+        for(int i = 0; i < n_t; i++){
+          nll(3) += MVNORM(y_cov)(y_re.transpose().col(i));
+        }
+      }
+      if(t_bypass == 0){
+        for(int i = 0; i < n_t; i++){
+          nll(3) -= dnorm(y_re(i,0),Type(0.),sig_y,true);
+        }
+      }
     }
+    
   }
   
   matrix<Type> l_cov(2,2);
@@ -139,13 +157,26 @@ template<class Type>
   l_cov(1,1) = sig_l * sig_l;
   l_cov(0,1) = psi_l * sig_l * sig_l;
   l_cov(1,0) = psi_l * sig_l * sig_l;
-  MVNORM_t<Type> l_dnorm(l_cov); 
   if(l_flag==1){
-    if(l_bypass == 1){
-      nll(4) += AR1(phi_l,l_dnorm)(l_re.transpose());
+    if(l_AR == 1){
+      if(l_bypass == 1){
+        nll(4) += AR1(phi_l,MVNORM(l_cov))(l_re.transpose());
+      }
+      if(l_bypass == 0){
+        nll(4) += SCALE(AR1(phi_l),sig_l)(l_re.col(0));
+      }
     }
-    if(l_bypass == 0){
-      nll(4) += SCALE(AR1(phi_l),sig_l)(l_re.col(0));
+    if(l_AR == 0){
+      if(l_bypass == 1){
+        for(int i = 0; i < l_re.dim(0); i++){
+          nll(4) += MVNORM(l_cov)(l_re.transpose().col(i));
+        }
+      }
+      if(l_bypass == 0){
+        for(int i = 0; i < l_re.dim(0); i++){
+          nll(4) -= dnorm(l_re(i,0),Type(0.),sig_y,true);
+        }
+      }
     }
   }
   
@@ -157,11 +188,25 @@ template<class Type>
   j_cov(1,0) = psi_j * sig_j * sig_j;
   MVNORM_t<Type> j_dnorm(j_cov); 
   if(j_flag==1){
-    if(j_bypass == 1){
-      nll(5) += AR1(phi_j,j_dnorm)(j_re.transpose());
+    if(j_AR == 1){
+      if(j_bypass == 1){
+        nll(5) += AR1(phi_j,j_dnorm)(j_re.transpose());
+      }
+      if(j_bypass == 0){
+        nll(5) += SCALE(AR1(phi_j),sig_j)(j_re.col(0));
+      }
     }
-    if(j_bypass == 0){
-      nll(5) += SCALE(AR1(phi_j),sig_j)(j_re.col(0));
+    if(j_AR == 0){
+      if(j_bypass == 1){
+        for(int i = 0; i < j_re.dim(0); i++){
+          nll(5) += MVNORM(j_cov)(j_re.transpose().col(i));
+        }
+      }
+      if(j_bypass == 0){
+        for(int i = 0; i < j_re.dim(0); i++){
+          nll(5) -= dnorm(j_re(i,0),Type(0.),sig_j,true);
+        }
+      }
     }
   }
   
