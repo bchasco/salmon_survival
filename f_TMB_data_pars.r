@@ -1,13 +1,13 @@
-f_TMB_data_pars <- function(df = 0,
-                            mesh = 0,
-                            rangeL = 0,
-                            rangeJ = 0,
-                            AR_flags = 0,
-                            by_pass = 0,
+f_TMB_data_pars <- function(df = 0, #pass the raw data
+                            mesh = 0, #mesh
+                            rangeL = 0, #range of the lengths
+                            rangeJ = 0, #range of days
+                            AR_flags = 0, #the rest are flags
+                            by_pass = 0, 
                             H_flag = 0,
                             b_flags = 0,
                             re_flags = 0){
-  # library(RandomFields)
+  
   library(raster)
   library(RANN)
   

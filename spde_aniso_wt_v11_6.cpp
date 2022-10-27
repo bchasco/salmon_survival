@@ -219,7 +219,8 @@ template<class Type>
       y_re(t_i(i) , a_i(i) * t_bypass) +
       l_re(l_i(i) , a_i(i) * l_bypass) +
       j_re(j_i(i) , a_i(i) * j_bypass) +
-      z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+      // z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+    z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
     
     nu_i(i) = exp(eta_i(i))/(1+exp(eta_i(i)));
 

@@ -11,8 +11,8 @@ f_mesh <- function(data = df,
   if( n_knots < nrow(loc_jl) ){
     knots_xy_jl = kmeans( x=loc_jl, centers=n_knots)
     # Modify data
-    loc_xy_jl = knots_xy_jl$centers
-    s_i_jl = knots_xy_jl$cluster
+    loc_xy_jl = knots_xy_jl$centers #center of clusters
+    s_i_jl = knots_xy_jl$cluster #index location for observations
   }
   
   # Build SPDE object using INLA (must pass mesh$idx$loc when supplying Boundary)
