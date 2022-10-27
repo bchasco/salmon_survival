@@ -249,10 +249,12 @@ template<class Type>
   Type Range_raw_jl = sqrt(8.0) / exp( log_kappa_jl );
 
   REPORT(Range_raw_jl);
-  
-  ADREPORT(l_re);
-  ADREPORT(j_re);
-  ADREPORT(y_re);
+  array<Type> mar_l(l_re.dim(0),l_re.dim(1)); mar_l = l_re + j_re(40) + mu;
+  array<Type> mar_j(j_re.dim(0),j_re.dim(1)); mar_j = j_re + l_re(22) + mu;
+  array<Type> mar_y(y_re.dim(0),y_re.dim(1)); mar_y = y_re + l_re(22) + j_re(40) + mu;
+  ADREPORT(mar_l);
+  ADREPORT(mar_j);
+  ADREPORT(mar_y);
   ADREPORT(mu);
   ADREPORT(bypass);
   

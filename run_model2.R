@@ -21,18 +21,20 @@ fit <- f_model(raw_file = "C:/NOAA/LARGE_data/chin_survival_1998_2019_with_tagge
                AR_flags = c(t_AR = 1, j_AR = 1, l_AR = 1),
                bypass_flags = c(t_bypass = 0, j_bypass = 0, 
                                 l_bypass = 0, jlt_bypass = 0, 
-                                mu_bypass = 1),
+                                mu_bypass = 0),
                re_flags = c(t_flag = 1, j_flag = 1, 
-                            l_flag = 1, jlt_flag = 1),
+                            l_flag = 1, jlt_flag = 0),
                H_flag = 1,
                version = "v11_6",
-               n_knots = 250,
+               n_knots = 50,
                random = c("y_re", "l_re", 
                           "j_re", "z_jlt"),
                compare_AIC = TRUE,
                getsd = TRUE)
 
-f_ggplot_interaction(fit = fit, bypass_cond = 1)
+f_ggplot_interaction(fit = fit, 
+                     bypass_cond = 1, 
+                     plot_type = "RE")
 
 # source("table_AIC_comp.r")
 # #If you decide to change something dramatic about the model
