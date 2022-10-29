@@ -43,7 +43,8 @@ template<class Type>
   DATA_IVECTOR( l_i );	      // length
   DATA_IVECTOR( j_i );	      // day
   DATA_IVECTOR( a_i );	      // bypass
-
+  DATA_IARRAY(m);   //management projections
+  DATA_IVECTOR(m_imv)
   DATA_VECTOR(total); //total number of fish of observed
   DATA_VECTOR(surv); //data number of fish that survived
   DATA_STRUCT(spde_jl,spde_aniso_t);
@@ -212,7 +213,12 @@ template<class Type>
   
   vector<Type> nu_i(n_i);
   vector<Type> eta_i(n_i);
-  for(int i=0; i<n_i; i++){
+  matrix<Type> proj(3,m_imv(1));
+  proj.setZero();
+  vector<Type> a_total(2);
+  a_total = 0;
+  
+  for(int i = 0; i < n_i; i++){
 
     eta_i(i) =  mu +
       a_i(i) * bypass +
@@ -224,10 +230,37 @@ template<class Type>
     
     nu_i(i) = exp(eta_i(i))/(1+exp(eta_i(i)));
 
+    //Do the projections
+    for(int mm = 0; mm < m_imv(1); mm++){
+      
+      int ss = m(i,mm,2);
+      int jj = m(i,mm,1);
+      int ll = m(i,mm,0);
+      
+      proj(a_i(i),mm) += total(i) * invlogit( mu +
+        a_i(i) * bypass +
+        y_re(t_i(i) , a_i(i) * t_bypass) +
+        l_re(ll , a_i(i) * l_bypass) +
+        j_re(jj , a_i(i) * j_bypass) +
+        z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))); //day X length X year
+      // 
+      // 
+      proj(2,mm) += invlogit(eta_i(i)) * total(i);
+    }
+    a_total(a_i(i)) += total(i);
+    
     nll(6) -= dbinom(surv(i),total(i),nu_i(i), true );
+    
   }
-
-
+  
+  for(int mm = 0; mm < m_imv(1); mm++){
+    for(int aa = 0; aa < 2; aa++){
+      proj(aa,mm) /= a_total(aa);
+    }
+    proj(2,mm) /= total.sum();
+  }
+  
+  
   REPORT(mu);
   REPORT(bypass);
   REPORT(nll);
@@ -244,19 +277,41 @@ template<class Type>
   REPORT(sig_l);
   REPORT(sig_j);
   REPORT(sig_y);
+  REPORT(proj);
+  REPORT(a_total);
+  
 
   
   Type Range_raw_jl = sqrt(8.0) / exp( log_kappa_jl );
 
   REPORT(Range_raw_jl);
-  array<Type> mar_l(l_re.dim(0),l_re.dim(1)); mar_l = l_re + j_re(40) + mu;
-  array<Type> mar_j(j_re.dim(0),j_re.dim(1)); mar_j = j_re + l_re(22) + mu;
-  array<Type> mar_y(y_re.dim(0),y_re.dim(1)); mar_y = y_re + l_re(22) + j_re(40) + mu;
+  array<Type> mar_j(j_re.dim(0),3); 
+  vector<int> j_int(3);
+  j_int << 14,40,67;
+  for(int i = 0; i < 3; i++ ){
+    mar_j.col(i) = j_re.col(0) + j_re(j_int(i)) + mu;
+  }
+
+  array<Type> mar_l(l_re.dim(0),3); 
+  vector<int> l_int(3);
+  l_int << 38,25,5;
+  for(int i = 0; i < 3; i++ ){
+    mar_l.col(i) = l_re.col(0) + l_re(l_int(i)) + mu;
+  }
+
+  array<Type> mar_y(y_re.dim(0),3); 
+  for(int i = 0; i < 3; i++ ){
+    mar_y.col(i) = y_re.col(0) + 
+    l_re(l_int(i)) +
+    j_re(j_int(i)) +
+    mu;
+  }
   ADREPORT(mar_l);
   ADREPORT(mar_j);
   ADREPORT(mar_y);
   ADREPORT(mu);
-  ADREPORT(bypass);
+  ADREPORT(mu+bypass);
+  ADREPORT(proj);
   
   return nll.sum();
 }

@@ -10,7 +10,12 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
   
   library(raster)
   library(RANN)
-  
+
+  for(i in 1:dim(mesh$tmb_proj)[2]){
+    mesh$tmb_proj[,i,'l'] <- mesh$tmb_proj[,i,'l'] - min(rangeL)
+    mesh$tmb_proj[,i,'j'] <- mesh$tmb_proj[,i,'j'] - min(rangeJ)
+  }
+    
   data <- list(n_i = length(df$s)
                ,a_i = df$a
                ,t_AR = AR_flags["t_AR"]
@@ -30,15 +35,6 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
                ,n_t = max(df$y - min(df$y))+1
                ,x_s_jl = mesh$mesh_jl$idx$loc - 1
                ,s_i_jl = mesh$knots_xy_jl$cluster - 1
-  #              ,management = cbind(s_i_jl_jm7_lp10 - 1,
-  #                                  s_i_jl_jm7_lm10 - 1, 
-  #                                  s_i_jl_jp7_lm10 - 1, 
-  #                                  s_i_jl_jp7_lp10 - 1, 
-  #                                  s_i_jl_jp7_l0 -1, 
-  #                                  s_i_jl_jm7_l0 - 1, 
-  #                                  s_i_jl_j0_lp10 -1 , 
-  #                                  s_i_jl_j0_lm10 -1, 
-  #                                  s_i_jl_j0_l0 -1)
                ,t_i = df$y - min(df$y)#Use all of the dataa
                ,l_i = df$l - rangeL['minL']
                ,j_i = df$j - rangeJ['minJ']
@@ -46,6 +42,8 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
                ,surv = df$ns
                ,spde_jl = mesh$spde_jl
                ,n_s_jl = mesh$spde_jl$n_s
+               ,m = mesh$tmb_proj
+               ,m_imv = dim(mesh$tmb_proj)
   )
   parameters <- list(
     mu = -4

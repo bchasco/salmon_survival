@@ -5,36 +5,53 @@ library(tidyr)
 
 rm(list=ls())
 
+source("f_cpp.r") #Compile new model
 source("f_raw_data.r") #Collect the raw data
+source("f_management_projection.r") #Compile new model
 source("f_mesh.r") #Build the mesh
 source("f_map.r") #Build the mesh
 source("f_TMB_data_pars.r") #Build the data and parameters lists
 source("f_model.r") #Sned everything to a TMb object and estimate
-source("f_cpp.r") #Compile new model
+
 source("f_ggplot_interaction.r") #plot epsilon and or survival
+source("f_ggplot_marginal_effects.r") #plot epsilon and or survival
 
 f_cpp("v11_6") #link the library
 
-fit <- f_model(raw_file = "C:/NOAA/LARGE_data/chin_survival_1998_2019_with_tagged_above.csv",
+file <- "C:/NOAA/LARGE_data/chin_survival_1998_2019_with_tagged_above.csv"
+
+fit <- f_model(raw_file = file,
                rangeL = c(minL = 85, maxL = 125),
                rangeJ = c(minJ = 85, maxJ = 160),
                AR_flags = c(t_AR = 1, j_AR = 1, l_AR = 1),
                bypass_flags = c(t_bypass = 0, j_bypass = 0, 
                                 l_bypass = 0, jlt_bypass = 0, 
-                                mu_bypass = 0),
+                                mu_bypass = 1),
                re_flags = c(t_flag = 1, j_flag = 1, 
-                            l_flag = 1, jlt_flag = 0),
+                            l_flag = 1, jlt_flag = 1),
                H_flag = 1,
                version = "v11_6",
-               n_knots = 50,
+               n_knots = 25,
                random = c("y_re", "l_re", 
                           "j_re", "z_jlt"),
                compare_AIC = TRUE,
-               getsd = TRUE)
+               getsd = TRUE,
+               m_proj = data.frame('j' = c(-7,0,7),
+                                   'l' = c(-4,0,4)))
 
-f_ggplot_interaction(fit = fit, 
-                     bypass_cond = 1, 
-                     plot_type = "RE")
+source("f_management_aggregate_comparison.r")
+# f_ggplot_interaction(fit = fit, 
+#                      bypass_cond = 1, 
+#                      plot_type = "RE")
+# 
+# f_ggplot_marginal_effects(fit = fit,
+#                           vars = c('mar_l'),
+#                           qq = 1.96,
+#                           height = 400,
+#                           width = 400,
+#                           yRange = c('mar_l' = 0.08, 'mar_j' = 0.08, 'mar_y' = 0.08),
+#                           save_file = TRUE,
+#                           alpha = alpha)
 
 # source("table_AIC_comp.r")
 # #If you decide to change something dramatic about the model

@@ -1,5 +1,8 @@
 f_mesh <- function(data = df,
-                       n_knots = 50){
+                   projections = projections,
+                   rangeL = rangeL,
+                   rangeJ = rangeJ,
+                   n_knots = 50){
   library(RandomFields)
   library(INLA)
   library(raster)
@@ -15,9 +18,21 @@ f_mesh <- function(data = df,
     s_i_jl = knots_xy_jl$cluster #index location for observations
   }
   
+  
   # Build SPDE object using INLA (must pass mesh$idx$loc when supplying Boundary)
   mesh_jl = inla.mesh.create( loc_xy_jl, refine=TRUE, extend=1 )
   inla_spde_jl = inla.spde2.matern(mesh = mesh_jl)
+  
+  #Turn everything into TMB addresses
+  # tmp <- array(NA , dim = c(nrow(df),nrow(grid),ncol(grid)+1))
+  tmb_proj <- projections$proj
+  dimnames(tmb_proj)[[3]] <- c("l", "j", "s_i")
+  
+  for(i in 1:dim(projections$proj)[2]){
+    tmb_proj[,i,c('s_i')] <- nn2(mesh_jl$loc[,1:2],
+                                 projections$proj[,i,c('j','l')],k=1)$nn.idx - 1
+  }
+
   
   # ---------- Start code that prepare objects for anisotropy. Should not be modified when you make your own example
   Dset = 1:2
@@ -48,5 +63,6 @@ f_mesh <- function(data = df,
   
   return(list(mesh_jl = mesh_jl,
               spde_jl = spde_jl,
+              tmb_proj = tmb_proj,
               knots_xy_jl = knots_xy_jl))
 }
