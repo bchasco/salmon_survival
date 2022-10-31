@@ -23,7 +23,7 @@ f_management_aggregate_comparison <- function(fit = fit,
     xlab("Management action") + 
     geom_errorbar(aes(ymin=(proj-1.96*sd), ymax=(proj+1.96*sd), colour = a), width=.2,
                   position=position_dodge(0.5)) +
-    ylim(0.006,0.0135) +
+    # ylim(0.006,0.0135) +
     geom_hline(yintercept = sum(fit$df$ns[fit$df$a==0])/sum(fit$df$nt[fit$df$a==0]), colour="#619CFF", size=1, alpha=0.5) +
     geom_hline(yintercept = sum(fit$df$ns[fit$df$a==1])/sum(fit$df$nt[fit$df$a==1]), colour="#F8766D", size=1, alpha=0.5) +
     # geom_hline(yintercept = sum(fit$df$ns[])/sum(fit$df$nt[]), colour = "#F8766D", size=3, alpha=0.5) +

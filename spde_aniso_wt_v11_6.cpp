@@ -215,8 +215,13 @@ template<class Type>
   vector<Type> eta_i(n_i);
   matrix<Type> proj(3,m_imv(1));
   proj.setZero();
+  array<Type> proj_y(3,m_imv(1),n_t);
+  proj_y.setZero();
+  
   vector<Type> a_total(2);
   a_total = 0;
+  matrix<Type> ay_total(2,n_t);
+  ay_total.setZero();
   
   for(int i = 0; i < n_i; i++){
 
@@ -237,29 +242,51 @@ template<class Type>
       int jj = m(i,mm,1);
       int ll = m(i,mm,0);
       
-      proj(a_i(i),mm) += total(i) * invlogit( mu +
+      Type wt = total(i) * invlogit( mu +
         a_i(i) * bypass +
         y_re(t_i(i) , a_i(i) * t_bypass) +
         l_re(ll , a_i(i) * l_bypass) +
         j_re(jj , a_i(i) * j_bypass) +
         z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))); //day X length X year
-      // 
-      // 
-      proj(2,mm) += invlogit(eta_i(i)) * total(i);
+      
+      proj(a_i(i),mm) +=  wt;     // 
+      proj_y(a_i(i),mm,t_i(i)) +=  wt;     // 
+        // 
+      proj(2,mm) += (eta_i(i)) * total(i);
     }
     a_total(a_i(i)) += total(i);
+    ay_total(a_i(i),t_i(i)) += total(i);
     
     nll(6) -= dbinom(surv(i),total(i),nu_i(i), true );
-    
   }
+  
+  SIMULATE{
+    for(int i = 0; i < n_i; i++){
+      surv(i) = rbinom( total(i) , nu_i(i) );
+    }
+    REPORT(surv);
+  }
+  
   
   for(int mm = 0; mm < m_imv(1); mm++){
     for(int aa = 0; aa < 2; aa++){
       proj(aa,mm) /= a_total(aa);
+      for(int y = 0; y < n_t; y++){
+        proj_y(aa,mm,y) /= ay_total(aa,y);
+      }
     }
     proj(2,mm) /= total.sum();
   }
   
+  for(int mm = 0; mm < m_imv(1); mm++){
+    for(int aa = 0; aa < 2; aa++){
+      for(int y = 0; y < n_t; y++){
+        if(mm != 4){
+          proj_y(aa,mm,y) = (proj_y(aa,mm,y) - proj_y(aa,4,y))/proj_y(aa,4,y) * 100;
+        }
+      }
+    }
+  }
   
   REPORT(mu);
   REPORT(bypass);
@@ -279,7 +306,8 @@ template<class Type>
   REPORT(sig_y);
   REPORT(proj);
   REPORT(a_total);
-  
+  REPORT(ay_total);
+  REPORT(proj_y);
 
   
   Type Range_raw_jl = sqrt(8.0) / exp( log_kappa_jl );
@@ -312,6 +340,7 @@ template<class Type>
   ADREPORT(mu);
   ADREPORT(mu+bypass);
   ADREPORT(proj);
+  ADREPORT(proj_y);
   
   return nll.sum();
 }

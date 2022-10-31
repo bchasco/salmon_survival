@@ -10,7 +10,12 @@ f_model <- function(raw_file = raw_file,
                    random = random,
                    compare_AIC = compare_AIC,
                    getsd = getsd,
-                   m_proj = proj){
+                   m_proj = proj,
+                   save_to_file = save_to_file,
+                   save_file = save_file,
+                   DHARMa_sim = DHARMa_sim,
+                   bias_sim = bias_sim,
+                   bias_sim_n = bias_sim_n){
   
   #read the data and do any transformations
   df <- f_raw_data(file = raw_file,
@@ -69,6 +74,14 @@ f_model <- function(raw_file = raw_file,
   #Save the report
   obj$rep <- obj$report()
 
+  if(bias_sim){
+    bias_sim <- f_bias_sim(obj = obj,
+               TMB_list = TMB_list,
+               map = map,
+               bias_sim_n = bias_sim_n)
+  }else{
+    bias_sim <- NA
+  }
   #This just keeps track of the model comparisons for 
   #choosing the best model
   # if(compare_AIC){
@@ -107,13 +120,40 @@ f_model <- function(raw_file = raw_file,
   #     }
   #   }
   # }
+
+  # d_res <- NA
+  if(DHARMa_sim){
+    
+    sim <- replicate(100, {
+      simdata <- obj$simulate()$surv
+    })
+    d_res <- createDHARMa(sim[,],
+                          obj$env$data$surv,
+                          fittedPredictedResponse = plogis(obj$rep$eta_i)*obj$env$data$total)
+    KSi <- testUniformity(d_res)
+  }
   
+  if(save_to_file){
+    fit <- list(
+      obj = obj
+      ,opt = opt
+      ,mesh = mesh
+      ,df = df
+      ,TMB_list = TMB_list
+      ,proj = projections)
+    save(file=save_file,fit)
+  }  
   return(list(
     obj = obj
     ,opt = opt
     ,mesh = mesh
     ,df = df
     ,TMB_list = TMB_list
-    ,proj = projections))
+    ,proj = projections
+    # ,sim = sim
+    # ,d_res = d_res
+    # ,KSi = KSi
+    ,bias_sim = bias_sim
+))
 }
 

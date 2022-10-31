@@ -7,7 +7,7 @@ f_raw_data <- function(file = "C:/NOAA/LARGE_data/chin_survival_1998_2019_subset
   library(RANN)
   
   x <- read.csv(file)
-  
+  # x$a <- 1
   #Rename column to original names
   names(x) <- c("l","j","y","s","a","diff")
   x <- x %>%
