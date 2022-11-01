@@ -16,7 +16,9 @@ f_model <- function(raw_file = raw_file,
                    DHARMa_sim = DHARMa_sim,
                    bias_sim = bias_sim,
                    bias_sim_n = bias_sim_n,
-                   sim_size = sim_size){
+                   sim_size = sim_size,
+                   proj_sim = proj_sim,
+                   proj_H = proj_H){
   
   #read the data and do any transformations
   df <- f_raw_data(file = raw_file,

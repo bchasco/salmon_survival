@@ -6,6 +6,8 @@ f_bias_sim <- function(obj = obj,
   
   
   sim_out <- matrix(NA,bias_sim_n,length(obj$par))
+  sim_proj <- array(NA,c(bias_sim_n,dim(obj$rep$proj_y)))
+  
   obj$env$data$sim_size <- sim_size
   
   for(i in 1:bias_sim_n){
@@ -34,11 +36,14 @@ f_bias_sim <- function(obj = obj,
     sim_obj$rep <- sim_obj$report()
     
     sim_out[i,] <- sim_opt$par
+    sim_proj[i,,,] <- sim_obj$rep$proj_y
+    
     print(paste("sys time", sys-Sys.time()))
   }
   # return(sim_out)
   return(list(sim_out = sim_out
               ,sim_i = sim_i
+              ,sim_proj = sim_proj
               ,sim_obj = sim_obj
               ,sim_opt = sim_opt
               ))

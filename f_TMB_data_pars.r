@@ -7,7 +7,9 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
                             H_flag = 0,
                             b_flags = 0,
                             re_flags = 0,
-                            sim_size = 0){
+                            sim_size = 0,
+                            proj_sim = 0,
+                            proj_H = c(0,0)){
   
   library(raster)
   library(RANN)
@@ -46,6 +48,8 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
                ,m = mesh$tmb_proj
                ,m_imv = dim(mesh$tmb_proj)
                ,sim_size = sim_size
+               ,proj_sim = proj_sim
+               ,proj_H = proj_H
   )
   parameters <- list(
     mu = -4

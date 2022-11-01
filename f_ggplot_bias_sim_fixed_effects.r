@@ -1,5 +1,5 @@
 #plot sim fixed effects
-f_bias_sim_fixed_effects <- function(fits = list(Orig_data = fit, N_i_2X = fit_sim_size_2)){
+f_ggplot_bias_sim_fixed_effects <- function(fits = list(Orig_data = fit, N_i_2X = fit_sim_size_2)){
   ex_names <- names(fits)
   varNames <- names(fits[[1]]$obj$par)
   varNames[varNames=="ln_H_input_jl"] <- c("lnH_1","lnH_2")

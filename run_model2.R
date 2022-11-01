@@ -44,8 +44,8 @@ fit <- f_model(raw_file = file,
                                    'l' = c(-4,0,4)),
                
                #Random effects (0 = leave out, 1 = include)
-               re_flags = c(t_flag = 1, j_flag = 1, 
-                            l_flag = 1, jlt_flag = 1),
+               re_flags = c(t_flag = 0, j_flag = 0, 
+                            l_flag = 0, jlt_flag = 0),
                
                #R.E. statistical model (0 = i.i.d, 1 = AR1, 2 = R.W.) 
                AR_flags = c(t_AR = 1, j_AR = 1, l_AR = 1),
@@ -68,7 +68,9 @@ fit <- f_model(raw_file = file,
                DHARMa_sim = FALSE,
                bias_sim = TRUE,
                bias_sim_n = 10,
-               sim_size = 1)
+               sim_size = 1,
+               proj_sim = FALSE,
+               proj_H = c(0.,0.,))
 
 # f_management_aggregate_comparison(fit = fit,
 #                                   save_to_file = FALSE)

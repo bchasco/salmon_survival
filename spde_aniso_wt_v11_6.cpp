@@ -48,6 +48,9 @@ template<class Type>
   DATA_VECTOR(surv); //data number of fish that survived
   DATA_STRUCT(spde_jl,spde_aniso_t);
   DATA_SCALAR(sim_size);
+  DATA_INTEGER(proj_sim);
+  DATA_VECTOR(proj_H);
+  
   
   PARAMETER(mu);
   PARAMETER(bypass);
@@ -84,6 +87,13 @@ template<class Type>
     H_jl(0,1) = ln_H_input_jl(1);
     H_jl(1,1) = (1+ln_H_input_jl(1)*ln_H_input_jl(1)) / exp(ln_H_input_jl(0));
   }
+  if(proj_sim==1){
+    H_jl(0,0) = exp(proj_H(0));
+    H_jl(1,0) = proj_H(1);
+    H_jl(0,1) = proj_H(1);
+    H_jl(1,1) = (1+proj_H(1)*proj_H(1)) / exp(proj_H(0));
+  }
+    
   REPORT(H_jl);
   
   //Transform the AR1 parameters
@@ -115,13 +125,24 @@ template<class Type>
     for(int t=0; t<n_t; t++){
       if(jlt_bypass == 0){
         nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
+        if(proj_sim){
+          SIMULATE{
+            SCALE(GMRF(Q_jl), 1/tau_jl2).simulate(z_jlt.col(t));
+          } 
+        }
       }
       if(jlt_bypass == 1){
         nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
+        if(proj_sim){
+          SIMULATE{
+            SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2).simulate(z_jlt.col(t));
+          } 
+        }
       }
     }
   }
-  
+
+
   
   matrix<Type> y_cov(2,2);
   y_cov(0,0) = sig_y * sig_y;
