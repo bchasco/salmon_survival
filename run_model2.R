@@ -1,10 +1,12 @@
-rm(list=ls())
+# rm(list=ls())
 
 library(TMB)
 library(INLA)
 library(dplyr)
 library(tidyr)
 library(DHARMa)
+library(raster)
+library(RANN)
 
 
 source("f_cpp.r") #Compile new model
@@ -25,6 +27,8 @@ f_cpp("v11_6") #link the library
 
 file <- "C:/NOAA/LARGE_data/chin_survival_1998_2019_with_tagged_above.csv"
 
+sys <- Sys.time()
+
 fit <- f_model(raw_file = file,
                
                #Data trimming
@@ -43,7 +47,7 @@ fit <- f_model(raw_file = file,
                re_flags = c(t_flag = 1, j_flag = 1, 
                             l_flag = 1, jlt_flag = 1),
                
-               #R.E. statistical model (0 = i.i.d, 1 = AR1) 
+               #R.E. statistical model (0 = i.i.d, 1 = AR1, 2 = R.W.) 
                AR_flags = c(t_AR = 1, j_AR = 1, l_AR = 1),
                
                #Bypass offset (0 = FALSE, 1 = TRUE)
@@ -63,7 +67,8 @@ fit <- f_model(raw_file = file,
                save_file = "fit.rData",
                DHARMa_sim = FALSE,
                bias_sim = TRUE,
-               bias_sim_n = 100)
+               bias_sim_n = 10,
+               sim_size = 1)
 
 # f_management_aggregate_comparison(fit = fit,
 #                                   save_to_file = FALSE)
@@ -93,3 +98,5 @@ fit <- f_model(raw_file = file,
 #   AIC_comp <- list()
 #   save(file="AIC_comp.rData",AIC_comp)  
 # }
+
+print(Sys.time()-sys)

@@ -30,7 +30,7 @@ f_map <- function(TMBlist = TMB_list){
     map <- append(map,
                   list(f_psij = as.factor(NA)))
   }
-  if(TMBlist$data$j_AR==0){
+  if(TMBlist$data$j_AR==0 | TMBlist$data$j_AR==2){
     map <- append(map,
                   list(f_phij = as.factor(NA)))
   }
@@ -49,7 +49,7 @@ f_map <- function(TMBlist = TMB_list){
     map <- append(map,
                   list(f_psil = as.factor(NA)))
   }
-  if(TMBlist$data$l_AR==0){
+  if(TMBlist$data$l_AR==0 | TMBlist$data$l_AR==2){
     map <- append(map,
                   list(f_phil = as.factor(NA)))
   }
@@ -83,6 +83,7 @@ f_map <- function(TMBlist = TMB_list){
                   ))
   }
 
+  print(names(map))
   return(map)
   
 }

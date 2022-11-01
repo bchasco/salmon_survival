@@ -1,4 +1,3 @@
-
 // Anisotropic version of "spde.cpp".
 #include <TMB.hpp>
 #include <fenv.h> // Extra line needed
@@ -48,7 +47,7 @@ template<class Type>
   DATA_VECTOR(total); //total number of fish of observed
   DATA_VECTOR(surv); //data number of fish that survived
   DATA_STRUCT(spde_jl,spde_aniso_t);
-
+  DATA_SCALAR(sim_size);
   
   PARAMETER(mu);
   PARAMETER(bypass);
@@ -159,6 +158,17 @@ template<class Type>
   l_cov(0,1) = psi_l * sig_l * sig_l;
   l_cov(1,0) = psi_l * sig_l * sig_l;
   if(l_flag==1){
+    if(l_AR == 2){
+      if(l_bypass == 1){
+        nll(4) += AR1(Type(0.99),MVNORM(l_cov))(l_re.transpose());
+      }
+      if(l_bypass == 0){
+        nll(4) -= dnorm(l_re(0,0),Type(0.),Type(1.),true);
+        for(int i = 1; i < l_re.dim(0); i++){
+          nll(5) -= dnorm(l_re(i,0),l_re(i-1,0),sig_l,true);
+        }
+      }
+    }
     if(l_AR == 1){
       if(l_bypass == 1){
         nll(4) += AR1(phi_l,MVNORM(l_cov))(l_re.transpose());
@@ -189,6 +199,20 @@ template<class Type>
   j_cov(1,0) = psi_j * sig_j * sig_j;
   MVNORM_t<Type> j_dnorm(j_cov); 
   if(j_flag==1){
+    if(j_AR == 2){
+      if(j_bypass == 1){
+        nll(5) += j_dnorm(j_re.transpose().col(0));
+        for(int i = 1; i < j_re.dim(0); i++){
+          nll(5) += j_dnorm(j_re.transpose().col(i) - j_re.transpose().col(i-1));
+        }
+      }
+      if(j_bypass == 0){
+        nll(5) -= dnorm(j_re(0,0),Type(0.),Type(1.),true);
+        for(int i = 1; i < j_re.dim(0); i++){
+          nll(5) -= dnorm(j_re(i,0),j_re(i-1,0),sig_j,true);
+        }
+      }
+    }
     if(j_AR == 1){
       if(j_bypass == 1){
         nll(5) += AR1(phi_j,j_dnorm)(j_re.transpose());
@@ -262,6 +286,7 @@ template<class Type>
   
   SIMULATE{
     for(int i = 0; i < n_i; i++){
+      Type tmp_size = total(i) * sim_size;
       surv(i) = rbinom( total(i) , nu_i(i) );
     }
     REPORT(surv);

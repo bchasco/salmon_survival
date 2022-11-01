@@ -1,4 +1,5 @@
 #Super annoying. This keeps TMB from recompile if there's been changes to the cpp
+# version <- 'v11_6'
 f_cpp <- function(version){
   cppFile <- paste0("spde_aniso_wt_",version,".cpp")
   cppLog <- paste0("lenWt_",version,".log")

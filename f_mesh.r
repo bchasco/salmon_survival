@@ -3,10 +3,7 @@ f_mesh <- function(data = df,
                    rangeL = rangeL,
                    rangeJ = rangeJ,
                    n_knots = 50){
-  library(RandomFields)
-  library(INLA)
-  library(raster)
-  library(RANN)
+  # library(RandomFields)
   
   #Raw locations
   loc_jl <- cbind(data$j,data$l)

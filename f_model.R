@@ -15,7 +15,8 @@ f_model <- function(raw_file = raw_file,
                    save_file = save_file,
                    DHARMa_sim = DHARMa_sim,
                    bias_sim = bias_sim,
-                   bias_sim_n = bias_sim_n){
+                   bias_sim_n = bias_sim_n,
+                   sim_size = sim_size){
   
   #read the data and do any transformations
   df <- f_raw_data(file = raw_file,
@@ -42,7 +43,8 @@ f_model <- function(raw_file = raw_file,
                               rangeL = rangeL,
                               rangeJ = rangeJ,
                               b_flags = bypass_flags,
-                              re_flags = re_flags)
+                              re_flags = re_flags,
+                  sim_size = sim_size)
 
   #Create the necessary map
   map <- #NA
@@ -59,11 +61,12 @@ f_model <- function(raw_file = raw_file,
                    , sdreport = FALSE)
 
   # print(obj$par)
-  
+
   #keep track of the mesh
   # obj$mesh <- mesh
 
   #Estimate the parameters
+  if(bias_sim) getsd <- FALSE
   opt <- #NA
   TMBhelper::fit_tmb( obj,
                              loopnum = 1,
@@ -78,61 +81,62 @@ f_model <- function(raw_file = raw_file,
     bias_sim <- f_bias_sim(obj = obj,
                TMB_list = TMB_list,
                map = map,
-               bias_sim_n = bias_sim_n)
+               bias_sim_n = bias_sim_n,
+               sim_size = sim_size)
   }else{
     bias_sim <- NA
   }
-  #This just keeps track of the model comparisons for 
+  #This just keeps track of the model comparisons for
   #choosing the best model
-  # if(compare_AIC){
-  #   load(file="AIC_comp.rData")
-  #   tmp_list <- list(bypass_flags = bypass_flags,
-  #                    AR_flags = AR_flags,
-  #                    re_flags = re_flags,
-  #                    AIC = round(opt$AIC,1))
-  # 
-  #   if(length(AIC_comp)==0){
-  #     print(unlist(tmp_list))
-  #     AIC_comp[[1]] <- unlist(tmp_list)
-  #     save(file="AIC_comp.rData",AIC_comp)
-  #   }
-  #   if(length(AIC_comp)>=1){
-  #     comps <- c('bypass_flags','re_flags','AR_flags')
-  #     same <- FALSE
-  #     for(ii in 1:length(AIC_comp)){
-  #       if(sum(unlist(AIC_comp[[ii]])[names(AIC_comp[[ii]])!='AIC']!=unlist(tmp_list)[names(AIC_comp[[ii]])!='AIC'])==0){
-  #         same <- TRUE
-  #         print("You've already run this model.")
-  #         tmp_df <- as.data.frame(AIC_comp, col.names=paste('model',1:length(AIC_comp)))
-  #         print(tmp_df)
-  #         print(paste("The delta AIC for this model is", round(abs(min(tmp_df['AIC',])-tmp_df['AIC',ii]),1)))
-  #         print(paste("See model", ii))
-  #         break;
-  #       }
-  #     }
-  #     if(!same){
-  #       print("not same")
-  #       AIC_comp[[length(AIC_comp)+1]] <- unlist(tmp_list)
-  #       save(file="AIC_comp.rData",AIC_comp)
-  #       tmp_df <- as.data.frame(AIC_comp, 
-  #                               col.names=paste('model',1:length(AIC_comp)))
-  #       print(tmp_df)
-  #     }
-  #   }
-  # }
+  if(compare_AIC){
+    load(file="AIC_comp.rData")
+    tmp_list <- list(bypass_flags = bypass_flags,
+                     AR_flags = AR_flags,
+                     re_flags = re_flags,
+                     AIC = round(opt$AIC,1))
 
-  # d_res <- NA
+    if(length(AIC_comp)==0){
+      print(unlist(tmp_list))
+      AIC_comp[[1]] <- unlist(tmp_list)
+      save(file="AIC_comp.rData",AIC_comp)
+    }
+    if(length(AIC_comp)>=1){
+      comps <- c('bypass_flags','re_flags','AR_flags')
+      same <- FALSE
+      for(ii in 1:length(AIC_comp)){
+        if(sum(unlist(AIC_comp[[ii]])[names(AIC_comp[[ii]])!='AIC']!=unlist(tmp_list)[names(AIC_comp[[ii]])!='AIC'])==0){
+          same <- TRUE
+          print("You've already run this model.")
+          tmp_df <- as.data.frame(AIC_comp, col.names=paste('model',1:length(AIC_comp)))
+          print(tmp_df)
+          print(paste("The delta AIC for this model is", round(abs(min(tmp_df['AIC',])-tmp_df['AIC',ii]),1)))
+          print(paste("See model", ii))
+          break;
+        }
+      }
+      if(!same){
+        print("not same")
+        AIC_comp[[length(AIC_comp)+1]] <- unlist(tmp_list)
+        save(file="AIC_comp.rData",AIC_comp)
+        tmp_df <- as.data.frame(AIC_comp,
+                                col.names=paste('model',1:length(AIC_comp)))
+        print(tmp_df)
+      }
+    }
+  }
+
+  d_res <- NA
   if(DHARMa_sim){
-    
-    sim <- replicate(100, {
+
+    dH_sim <- replicate(100, {
       simdata <- obj$simulate()$surv
     })
-    d_res <- createDHARMa(sim[,],
+    d_res <- createDHARMa(dH_sim[,],
                           obj$env$data$surv,
                           fittedPredictedResponse = plogis(obj$rep$eta_i)*obj$env$data$total)
     KSi <- testUniformity(d_res)
   }
-  
+
   if(save_to_file){
     fit <- list(
       obj = obj
@@ -142,7 +146,7 @@ f_model <- function(raw_file = raw_file,
       ,TMB_list = TMB_list
       ,proj = projections)
     save(file=save_file,fit)
-  }  
+  }
   return(list(
     obj = obj
     ,opt = opt
