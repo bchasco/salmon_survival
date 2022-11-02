@@ -87,13 +87,6 @@ template<class Type>
     H_jl(0,1) = ln_H_input_jl(1);
     H_jl(1,1) = (1+ln_H_input_jl(1)*ln_H_input_jl(1)) / exp(ln_H_input_jl(0));
   }
-  if(proj_sim==1){
-    H_jl(0,0) = exp(proj_H(0));
-    H_jl(1,0) = proj_H(1);
-    H_jl(0,1) = proj_H(1);
-    H_jl(1,1) = (1+proj_H(1)*proj_H(1)) / exp(proj_H(0));
-  }
-    
   REPORT(H_jl);
   
   //Transform the AR1 parameters
@@ -120,6 +113,7 @@ template<class Type>
   jl_cov(1,1) = 1.;
   jl_cov(0,1) = psi_jl;
   jl_cov(1,0) = psi_jl;
+  matrix<Type> z_sim(z_jlt.dim[0], z_jlt.dim[1] );
   MVNORM_t<Type> jl_dnorm(jl_cov); 
   if(jlt_flag==1){
     for(int t=0; t<n_t; t++){
@@ -127,7 +121,9 @@ template<class Type>
         nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
-            SCALE(GMRF(Q_jl), 1/tau_jl2).simulate(z_jlt.col(t));
+            
+            z_jlt.col(t) = GMRF(Q_jl).simulate();
+            z_jlt.col(t) /= tau_jl2;
           } 
         }
       }
@@ -135,7 +131,8 @@ template<class Type>
         nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
-            SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2).simulate(z_jlt.col(t));
+            // z_jlt.col(t) =SEPARABLE(jl_dnorm, GMRF(Q_jl)).simulate();
+            // z_jlt.col(t) /= tau_jl2;
           } 
         }
       }

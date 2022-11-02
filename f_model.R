@@ -30,14 +30,12 @@ f_model <- function(raw_file = raw_file,
                                        rangeJ = rangeJ,
                                        rangeL = rangeL)
   #create the INLA mesh
-  mesh <- 
-    f_mesh(data = df,
+  mesh <- f_mesh(data = df,
                  n_knots = n_knots,
                  projections = projections)
 
   # #Create the data and parameters objects for TMB
-  TMB_list <- 
-  f_TMB_data_pars(df = df,
+  TMB_list <- f_TMB_data_pars(df = df,
                               mesh = mesh,
                               by_pass = 1,
                               AR_flags = AR_flags,
