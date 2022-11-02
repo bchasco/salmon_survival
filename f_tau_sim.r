@@ -35,7 +35,7 @@ g <- ggplot(df, aes(x=val, color=as.factor(var))) +
   ylab("") +
   xlim(-50,100) +
   geom_vline(xintercept = 0) + 
-  guides(fill=guide_legend(title="Interaction\nrange"))
+  guides(fill=guide_legend(title="Interaction\nvariance"))
 
 print(g)
 dev.off()
