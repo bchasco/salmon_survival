@@ -43,7 +43,7 @@ f_management_annual_comparison <- function(fit = fit,
   
   
   if(save_to_file){
-    png("f_ggplot_management_aggregate_comparison.png",
+    png("f_ggplot_management_annual_comparison.png",
         width=500, height = 500,
         res=100)
   }

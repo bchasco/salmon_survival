@@ -1,11 +1,13 @@
 f_ggplot_marginal_effects <- function(fit = fit,
                                       vars = 'mar_l',
-                                      alpha = alpha,
+                                      alpha_data = 0.1,
+                                      include_data = FALSE,
                                       xNames = c('mar_l' = "Length (mm)", 'mar_j' = 'Calendar day', 'mar_y' = "Smolt year"),
                                       yRange = c('mar_l' = 0.08, 'mar_j' = 0.08, 'mar_y' = 0.06),
                                       qq = 1.64,
                                       height = 600,
                                       width = 400,
+                                      point_size = 24,
                                       file = "f_ggplot_marginal_effects.png",
                                       save_file = TRUE){
 
@@ -22,7 +24,7 @@ f_ggplot_marginal_effects <- function(fit = fit,
     if(i =='mar_l'){
       x <- x %>% 
         filter(a == 0) %>%
-        group_by(var = l, j = j)%>% 
+        group_by(var = l + min(fit$df$l), j = j + min(fit$df$j))%>% 
         summarise(ns = sum(ns),
                   nt = sum(nt))  #get rid of diff column
       myNames <- c("early","average","late")
@@ -30,7 +32,7 @@ f_ggplot_marginal_effects <- function(fit = fit,
     if(i =='mar_j'){
       x <- x %>% 
         filter(a == 0) %>%
-        group_by(var = j, l = l)%>% 
+        group_by(var = j + min(fit$df$j), l = l + min(fit$df$l))%>% 
         summarise(ns = sum(ns),
                   nt = sum(nt))  #get rid of diff column
       myNames <- c("large","average","small")
@@ -48,13 +50,30 @@ f_ggplot_marginal_effects <- function(fit = fit,
                      y = c(sdEst[[1]]), 
                      sd = c(sdSd[[1]])) 
     
-    g <- ggplot(re, aes(x=x, y=plogis(y), group = Level)) +
-      geom_point(data = x, 
-                 aes(x = var - min(var) + 1, 
-                     y = ns/nt, 
-                     alpha = 0.1), 
-                 show.legend = FALSE,
-                 inherit.aes = FALSE) + 
+    if(i=='mar_l'){
+      re$x <- re$x + min(fit$df$l)
+    }
+    if(i=='mar_j'){
+      re$x <- re$x + min(fit$df$j)
+    }
+    if(i=='mar_y'){
+      re$x <- re$x + min(fit$df$y)
+    }
+
+    
+    g <- ggplot(re, aes(x=x, y=plogis(y), group = Level)) 
+    if(include_data){
+      g <- g + 
+        geom_point(data = x, 
+                   aes(x = var - min(var), 
+                       y = ns/nt,
+                       fill = "black"),
+                   colour = NA,
+                   alpha = alpha_data,
+                   show.legend = FALSE,
+                   inherit.aes = FALSE)  
+    }
+      g <- g + 
       theme_bw() + 
       theme(panel.border = element_blank(), 
             panel.grid.major = element_blank(),
@@ -63,7 +82,8 @@ f_ggplot_marginal_effects <- function(fit = fit,
       geom_ribbon(aes(ymin=plogis(y - qq*sd),
                       ymax=plogis(y + qq*sd),
                       fill = Level),
-                  alpha = 0.2) +
+                  alpha = 0.2,
+                  show.legend = FALSE) +
       geom_line(aes(colour = Level), size = 1) +
       guides(fill=guide_legend(title=""), colour=guide_legend(title="")) +
       xlab(xNames[i]) +
@@ -78,7 +98,7 @@ f_ggplot_marginal_effects <- function(fit = fit,
   
   require(grid)
   annotate_figure(p = gp, left = textGrob("Survival", rot = 90, vjust = 1, gp = gpar(cex = 1.3)))
-  if(save_file) png(file, height = height, width = width, pointsize = 16)
+  if(save_file) png(file, height = height, width = width, pointsize = point_size)
   print(gp)
   if(save_file) dev.off()
   return(gp)

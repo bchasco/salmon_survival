@@ -1,5 +1,10 @@
 f_management_aggregate_comparison <- function(fit = fit,
-                                              save_to_file = FALSE){
+                                              save_to_file = FALSE,
+                                              width = 400,
+                                              height = 400,
+                                              res = 100,
+                                              actions_to_include = NA,
+                                              point_size = 20){
   library(ggplot2)
   
   proj <- t(as.list(fit$opt$SD, 'Est', report=TRUE)['proj'][[1]])
@@ -10,11 +15,14 @@ f_management_aggregate_comparison <- function(fit = fit,
   projSD <- projSD[id_order,]
   
   actionNames <- paste0 ('length ',fit$proj$grid[,'l'],"\n",'arrival ',fit$proj$grid[,'j'])
+  print(actionNames)
   
   df <- data.frame(proj = c(proj), sd = c(projSD))
   df$id <- rep(1:nrow(proj),ncol(proj))
   df$a <- rep(c("LGR","by-pass","aggregate"),each = nrow(proj))
   df$action <- rep(id_order,ncol(proj))
+  
+  df <- df[df$action %in% actions_to_include,]
   
   g <- ggplot(df[df$a!="aggregate",], aes(y=proj, x=as.factor(id), group=a)) +
     theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -32,14 +40,15 @@ f_management_aggregate_comparison <- function(fit = fit,
                shape=15,
                position=position_dodge(0.5)) +
     theme(axis.text.x = element_text(angle = 0)) +
-    scale_x_discrete(labels= actionNames[id_order]) + 
+    scale_x_discrete(labels= actionNames[actions_to_include]) + 
     guides(colour=guide_legend(title="Migration\npathway"))
   
   
   if(save_to_file){
     png("f_ggplot_management_aggregate_comparison.png", 
-        width=500, height = 500, 
-        res=100)
+        width=width, height = height, 
+        res=res,
+        pointsize = point_size)
   }
   
   print(g)
