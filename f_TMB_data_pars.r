@@ -19,7 +19,7 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
     mesh$tmb_proj[,i,'j'] <- mesh$tmb_proj[,i,'j'] - min(rangeJ)
   }
     
-  data <- list(n_i = length(df$s)
+  data <- list(n_i = nrow(df)
                ,a_i = df$a
                ,t_AR = AR_flags["t_AR"]
                ,l_AR = AR_flags["l_AR"]

@@ -62,53 +62,20 @@ fit <- f_model(raw_file = file,
                random = c("y_re", "l_re", 
                           "j_re", "z_jlt"),
                
-               H_flag = 1,
-               version = "v11_6",
-               compare_AIC = FALSE,
-               getsd = FALSE, #must be turned on for marginal plots
-               save_to_file = FALSE,
-               save_file = "fit.rData",
-               DHARMa_sim = FALSE,
-               bias_sim = FALSE, #Simulated bias of parameters
-               bias_sim_n = 10, #
-               sim_size = 1, #Sample size experiment
+               H_flag = 1, #flag for anisotropy
+               version = "v11_6", #model version
+               compare_AIC = FALSE, #compare the AIC to previous model runs
+               getsd = FALSE, #must be turned on for marginal plots, but turned off for management plots
+               save_to_file = FALSE, #save the fit to a file
+               save_file = "bias_sim_n2.rData", #file name of the saved fit
+               DHARMa_sim = FALSE, #do the DHARMa simulations
+               bias_sim = TRUE, #Simulated bias of parameters
+               bias_sim_n = 50, #
+               sim_size = 2, #Sample size experiment
                proj_sim = 0, #Projection simulation
                proj_H = c(0.,0.,)) #Anisotropy simulation
 
-f_management_aggregate_comparison(fit = fit,
-                                  save_to_file = TRUE,
-                                  actions_to_include = c(1,3,7,9),
-                                  width = 700, 
-                                  height = 400)
-
-f_management_annual_comparison(fit = fit,
-                               save_to_file = TRUE,
-                               actions_to_include = c(1,3,7,9))
-
-f_ggplot_interaction(fit = fit,
-                     bypass_cond = 1,
-                     years_to_plot = 1998:2019,
-                     plot_type = "Survival", #Survival or RE
-                     save_to_file = TRUE)
-# 
-f_ggplot_marginal_effects(fit = fit,
-                          vars = c('mar_j', 'mar_l', 'mar_y'),
-                          qq = 0.67,
-                          include_data = FALSE,
-                          alpha_data = 0.05,
-                          point_size = 50,
-                          height = 500,
-                          width = 300,
-                          yRange = c('mar_l' = 0.025, 'mar_j' = 0.025, 'mar_y' = 0.055),
-                          save_file = TRUE)
-
-f_tau_sim(fit = fit, n_sim = 50, 
-          save_to_file = TRUE, res=100, point_size = 12,
-          width = 400, height = 500)
-f_range_sim(fit = fit, n_sim = 50, 
-            save_to_file = TRUE, res = 100, point_size = 12,
-            width = 400, height = 500)
-
+# source("f_create_all_plots.r")
 
 # source("table_AIC_comp.r")
 # #If you decide to change something dramatic about the model

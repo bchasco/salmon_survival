@@ -9,12 +9,10 @@ f_bias_sim <- function(obj = obj,
   sim_proj <- array(NA,c(bias_sim_n,dim(obj$rep$proj_y)))
   
   obj$env$data$sim_size <- sim_size
-  
+  obj$env$data$total <- round(obj$env$data$total * sim_size,0)
   for(i in 1:bias_sim_n){
     sys <- Sys.time()
     #Set the year, day, and length random effects equal to their MLE values for the operating model.
-    tmp_total <- round(obj$env$data$total * sim_size,0)
-    obj$env$data$total <- tmp_total
     sim_i <- obj$simulate(complete=TRUE) #simulate data from the original model
     print(paste(sum(sim_i$surv), "sim ", i , "out of ", bias_sim_n))
     random <- obj$env$.random
@@ -25,7 +23,9 @@ f_bias_sim <- function(obj = obj,
                          , DLL=paste0("spde_aniso_wt_","v11_6")
                          # , sdreport = FALSE
                          , checkParameterOrder = TRUE
-                         , silent = FALSE)
+                         , silent = TRUE)
+    print(sum(sim_obj$env$data$total))  
+    print(sum(sim_obj$env$data$surv))  
     
     sim_opt <- TMBhelper::fit_tmb( sim_obj,
                                loopnum = 1,

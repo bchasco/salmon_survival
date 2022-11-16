@@ -1,0 +1,14 @@
+"","c.bypass_flags.t_bypass...1..bypass_flags.j_bypass...1..bypass_flags.l_bypass...1..","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0..","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...1","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...2","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...3","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...4","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...5","c.bypass_flags.t_bypass...1..bypass_flags.j_bypass...1..bypass_flags.l_bypass...1...1","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...1..bypass_flags.l_bypass...0..","c.bypass_flags.t_bypass...1..bypass_flags.j_bypass...1..bypass_flags.l_bypass...0..","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...1..bypass_flags.l_bypass...0...1","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...6","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...7","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...8","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...9","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...10","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...11","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...12","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...13","c.bypass_flags.t_bypass...0..bypass_flags.j_bypass...0..bypass_flags.l_bypass...0...14"
+"bypass_flags.t_bypass",1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0
+"bypass_flags.j_bypass",1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0
+"bypass_flags.l_bypass",1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+"bypass_flags.jlt_bypass",1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+"bypass_flags.mu_bypass",1,1,0,0,1,1,1,1,1,1,1,1,0,1,1,0,1,1,1,1
+"AR_flags.t_AR",1,0,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1
+"AR_flags.j_AR",1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2
+"AR_flags.l_AR",1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2
+"re_flags.t_flag",1,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,0,1,0,1
+"re_flags.j_flag",1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,0,0,1,1
+"re_flags.l_flag",1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1
+"re_flags.jlt_flag",1,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,1
+"AIC",34857,36832,36841.8,35073.2,34984.7,34918.5,34843,34857,34848,34844,34844.3,34851.7,34922.8,38750.7,38376.6,36850.2,38516.8,36983.5,38628.2,36623.4

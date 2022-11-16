@@ -304,8 +304,7 @@ template<class Type>
   
   SIMULATE{
     for(int i = 0; i < n_i; i++){
-      Type tmp_size = total(i) * sim_size;
-      surv(i) = rbinom( total(i) , nu_i(i) );
+      surv(i) = rbinom( total(i), nu_i(i) );
     }
     REPORT(surv);
   }

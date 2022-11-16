@@ -1,14 +1,16 @@
 f_management_annual_comparison <- function(fit = fit,
                                               save_to_file = FALSE,
-                                              actions_to_include = c(3)){
+                                              actions_to_include = c(3),
+                                           height = 700,
+                                           width = 400){
   library(ggplot2)
 
   proj <- (as.list(fit$opt$SD, 'Est', report=TRUE)['proj_y'][[1]])
   projSD <- (as.list(fit$opt$SD, 'Std', report=TRUE)['proj_y'][[1]])
   
-  actionNames <- paste0 ('length ',fit$proj$grid[,'l'],
-                                   "\n",'arrival ',
-                                   fit$proj$grid[,'j'])
+  actionNames <- paste0 (fit$proj$grid[,'l'], ' mm',
+                                   "\n",
+                                   fit$proj$grid[,'j'], ' days')
   
   df <- data.frame(proj = c(proj), sd = c(projSD))
   df$y <- rep(1:dim(proj)[3]+1997,each = dim(proj)[1] * length(actionNames))
@@ -44,7 +46,7 @@ f_management_annual_comparison <- function(fit = fit,
   
   if(save_to_file){
     png("f_ggplot_management_annual_comparison.png",
-        width=500, height = 500,
+        width=width, height = height,
         res=100)
   }
 
