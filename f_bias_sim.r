@@ -10,6 +10,7 @@ f_bias_sim <- function(obj = obj,
   
   obj$env$data$sim_size <- sim_size
   obj$env$data$total <- round(obj$env$data$total * sim_size,0)
+  
   for(i in 1:bias_sim_n){
     sys <- Sys.time()
     #Set the year, day, and length random effects equal to their MLE values for the operating model.
