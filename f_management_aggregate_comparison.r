@@ -14,7 +14,7 @@ f_management_aggregate_comparison <- function(fit = fit,
   proj <- proj[id_order,]
   projSD <- projSD[id_order,]
   
-  actionNames <- paste0 ('length ',fit$proj$grid[,'l'],"\n",'arrival ',fit$proj$grid[,'j'])
+  actionNames <- paste0 (fit$proj$grid[,'l'], ' mm',"\n",fit$proj$grid[,'j'], ' days')
   print(actionNames)
   
   df <- data.frame(proj = c(proj), sd = c(projSD))

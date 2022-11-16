@@ -1,8 +1,8 @@
 f_model <- function(raw_file = raw_file,
-                   rangeL = rangeL,
-                   rangeJ = rangeJ,
-                   AR_flags = AR_flags,
-                   bypass_flags = bypass_flags,
+                   rangeL = NA,
+                   rangeJ = NA,
+                   AR_flags = NA,
+                   bypass_flags = NA,
                    H_flag = H_flag,
                    re_flags = re_flags,
                    version = version,
@@ -25,15 +25,18 @@ f_model <- function(raw_file = raw_file,
                    rangeL = rangeL,
                    rangeJ = rangeJ)
   
+  
   projections <- f_management_projection(df = df,
                                        m_proj = m_proj,
                                        rangeJ = rangeJ,
                                        rangeL = rangeL)
+  
   #create the INLA mesh
   mesh <- f_mesh(data = df,
                  n_knots = n_knots,
                  projections = projections)
 
+  
   # #Create the data and parameters objects for TMB
   TMB_list <- f_TMB_data_pars(df = df,
                               mesh = mesh,
@@ -44,12 +47,15 @@ f_model <- function(raw_file = raw_file,
                               rangeJ = rangeJ,
                               b_flags = bypass_flags,
                               re_flags = re_flags,
-                  sim_size = sim_size)
+                              sim_size = sim_size)
 
   #Create the necessary map
+  # print(dim(df))
+  # return(df)
   map <- #NA
   f_map(TMB_list)
 
+  
   #TMB object
   obj <-   #NA
   MakeADFun(TMB_list$data
@@ -59,7 +65,6 @@ f_model <- function(raw_file = raw_file,
                    , map = map
                    , DLL=paste0("spde_aniso_wt_",version)
                    , sdreport = FALSE)
-
   # print(obj$par)
 
   #keep track of the mesh
@@ -144,6 +149,7 @@ f_model <- function(raw_file = raw_file,
       ,mesh = mesh
       ,df = df
       ,TMB_list = TMB_list
+      ,bias_sim = bias_sim
       ,proj = projections)
     save(file=save_file,fit)
   }
@@ -154,9 +160,6 @@ f_model <- function(raw_file = raw_file,
     ,df = df
     ,TMB_list = TMB_list
     ,proj = projections
-    # ,sim = sim
-    # ,d_res = d_res
-    # ,KSi = KSi
     ,bias_sim = bias_sim
 ))
 }

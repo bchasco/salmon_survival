@@ -40,11 +40,15 @@ f_range_sim <- function(fit = fit,
               data.frame(val = c(proj_sim[,3,1:2,3,]),
                          var=rep(paste0("2x (",x2,"%)"),length(c(proj_sim[,3,1:2,3,])))))
   
-  g <- ggplot(df, aes(x=val, color=as.factor(var))) +
-    geom_histogram(aes(fill=as.factor(var)), alpha=0.5, position="identity") +
+  g <- ggplot(df, aes(x=val)) +
+    facet_wrap(~var, ncol = 1, scales = "free") +
+    geom_histogram(aes(), alpha=0.5, position="identity", show.legend = FALSE) +
     xlab("Percent change in annual survival") + 
     ylab("") +
     xlim(xlim) +
+    theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                       panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
+    theme(panel.background = element_rect(fill = NA)) + 
     geom_vline(xintercept = 0) +
     guides(fill=guide_legend(title="Interaction\nrange"))
   if(save_to_file){
@@ -59,5 +63,6 @@ f_range_sim <- function(fit = fit,
   print(g)
   
   fit$obj$env$last.par['log_kappa_jl'] <- o.kappa
-  
+
+  return(g)  
 }

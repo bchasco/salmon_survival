@@ -60,8 +60,13 @@ f_ggplot_marginal_effects <- function(fit = fit,
       re$x <- re$x + min(fit$df$y)
     }
 
+    if(i == 'mar_j'){
+      g <- ggplot(re[re$Level=="average",], aes(x=as.Date(x, origin = as.Date("2018-01-01")), 
+                                                y=plogis(y), group = Level)) 
+    }else{
+      g <- ggplot(re[re$Level=="average",], aes(x=x, y=plogis(y), group = Level)) 
+    }
     
-    g <- ggplot(re, aes(x=x, y=plogis(y), group = Level)) 
     if(include_data){
       g <- g + 
         geom_point(data = x, 
@@ -78,13 +83,12 @@ f_ggplot_marginal_effects <- function(fit = fit,
       theme(panel.border = element_blank(), 
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(), 
-            axis.line = element_line(colour = "black")) +
+            axis.line = element_line()) +
       geom_ribbon(aes(ymin=plogis(y - qq*sd),
-                      ymax=plogis(y + qq*sd),
-                      fill = Level),
+                      ymax=plogis(y + qq*sd)),
                   alpha = 0.2,
                   show.legend = FALSE) +
-      geom_line(aes(colour = Level), size = 1) +
+      geom_line(aes(), size = 1) +
       guides(fill=guide_legend(title=""), colour=guide_legend(title="")) +
       xlab(xNames[i]) +
       ylim(0,yRange[i]) + 
