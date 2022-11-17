@@ -28,12 +28,13 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
                ,t_bypass = b_flags['t_bypass']
                ,j_bypass = b_flags['j_bypass']
                ,l_bypass = b_flags['l_bypass']
+               ,jl_bypass = b_flags['jl_bypass']
                ,jlt_bypass = b_flags['jlt_bypass']
                ,H_flag = H_flag
                ,j_flag = re_flags['j_flag']
                ,l_flag = re_flags['l_flag']
                ,t_flag = re_flags['t_flag']
-               # ,z_jl_flag = z_jl_flag
+               ,jl_flag = re_flags['jl_flag']
                ,jlt_flag = re_flags['jlt_flag']
                ,n_t = max(df$y - min(df$y))+1
                ,x_s_jl = mesh$mesh_jl$idx$loc - 1
@@ -54,10 +55,12 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
   parameters <- list(
     mu = -4
     ,bypass = 0
+    ,log_tau_jl = 0
     ,log_tau_jl2 = 0
     ,log_kappa_jl = 0
     ,ln_H_input_jl = c(0,0)
-    # ,z_jl = rep(0,c(mesh$spde_jl$n_s)) #number of stations by the number of years
+    ,z_jl = array(0,c(mesh$spde_jl$n_s,
+                      b_flags['jl_bypass'] + 1)) #number of stations by the number of years
     ,z_jlt = array(0,c(mesh$spde_jl$n_s,
                        b_flags['jlt_bypass'] + 1,
                        data$n_t)) #num
@@ -77,6 +80,7 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
     ,f_psiy = 0
     ,f_psij = 0
     ,f_psijl = 0
+    ,f_psijlt = 0
   )
 
   return(list(data = data,

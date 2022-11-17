@@ -25,7 +25,7 @@ f_model <- function(raw_file = raw_file,
                    rangeL = rangeL,
                    rangeJ = rangeJ)
   
-  
+  print("test")  
   projections <- f_management_projection(df = df,
                                        m_proj = m_proj,
                                        rangeJ = rangeJ,
@@ -48,14 +48,13 @@ f_model <- function(raw_file = raw_file,
                               b_flags = bypass_flags,
                               re_flags = re_flags,
                               sim_size = sim_size)
-
   #Create the necessary map
   # print(dim(df))
   # return(df)
   map <- #NA
   f_map(TMB_list)
 
-  
+
   #TMB object
   obj <-   #NA
   MakeADFun(TMB_list$data
@@ -65,8 +64,8 @@ f_model <- function(raw_file = raw_file,
                    , map = map
                    , DLL=paste0("spde_aniso_wt_",version)
                    , sdreport = FALSE)
-  # print(obj$par)
-
+  print(obj$par)
+  print(names(map))
   #keep track of the mesh
   # obj$mesh <- mesh
 

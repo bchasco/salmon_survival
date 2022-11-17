@@ -47,29 +47,29 @@ fit <- f_model(raw_file = file,
                                    'l' = c(-4,0,4)),
                
                #Random effects (0 = leave out, 1 = include)
-               re_flags = c(t_flag = 1, j_flag = 1, 
-                            l_flag = 1, jlt_flag = 1),
+               re_flags = c(t_flag = 1, j_flag = 1, l_flag = 1, 
+                            jl_flag = 0, jlt_flag = 1),
                
                #R.E. statistical model (0 = i.i.d, 1 = AR1, 2 = R.W.) 
-               AR_flags = c(t_AR = 1, j_AR = 1, l_AR = 1),
+               AR_flags = c(t_AR = 2, j_AR = 2, l_AR = 2), #AR1 with all by-pass does not converge, iid does, rw does
                
                #Bypass offset (0 = FALSE, 1 = TRUE)
-               bypass_flags = c(t_bypass = 0, j_bypass = 0, 
-                                l_bypass = 0, jlt_bypass = 0, 
-                                mu_bypass = 1),
+               bypass_flags = c(t_bypass = 0, j_bypass = 1, l_bypass = 0, 
+                                jl_bypass = 0, jlt_bypass = 0, 
+                                mu_bypass = 1), #The full by-pass model does not converge because of the H vector
                
                #TMB (random or fixed)
-               random = c("y_re", "l_re", 
+               random = c("y_re", "l_re",'z_jl', 
                           "j_re", "z_jlt"),
                
                H_flag = 1, #flag for anisotropy
                version = "v11_6", #model version
-               compare_AIC = FALSE, #compare the AIC to previous model runs
+               compare_AIC = TRUE, #compare the AIC to previous model runs
                getsd = FALSE, #must be turned on for marginal plots, but turned off for management plots
                save_to_file = FALSE, #save the fit to a file
                save_file = "bias_sim_n2.rData", #file name of the saved fit
                DHARMa_sim = FALSE, #do the DHARMa simulations
-               bias_sim = TRUE, #Simulated bias of parameters
+               bias_sim = FALSE, #Simulated bias of parameters
                bias_sim_n = 50, #
                sim_size = 2, #Sample size experiment
                proj_sim = 0, #Projection simulation
@@ -77,12 +77,13 @@ fit <- f_model(raw_file = file,
 
 # source("f_create_all_plots.r")
 
-# source("table_AIC_comp.r")
-# #If you decide to change something dramatic about the model
-# clear_AIC_comp <- FALSE
-# if(clear_AIC_comp){
-#   AIC_comp <- list()
-#   save(file="AIC_comp.rData",AIC_comp)  
-# }
+#If you decide to change something dramatic about the model
+clear_AIC_comp <- FALSE
+if(clear_AIC_comp){
+  AIC_comp <- list()
+  save(file="AIC_comp.rData",AIC_comp)
+}
+
+source("table_AIC_comp.r")
 
 print(Sys.time()-sys)

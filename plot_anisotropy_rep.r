@@ -1,6 +1,6 @@
 rep <- fit$obj$rep
 
-Eigen = eigen(myProj$sim_obj$H_jl)
+Eigen = eigen(rep$H_jl)
 rss = function(V) sqrt(sum(V[1]^2+V[2]^2))
 Pos_Major = Eigen$vectors[,1]*Eigen$values[1] * rep$Range_raw_jl
 Pos_Minor = Eigen$vectors[,2]*Eigen$values[2] * rep$Range_raw_jl
