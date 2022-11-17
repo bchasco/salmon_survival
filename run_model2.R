@@ -54,7 +54,7 @@ fit <- f_model(raw_file = file,
                AR_flags = c(t_AR = 2, j_AR = 2, l_AR = 2), #AR1 with all by-pass does not converge, iid does, rw does
                
                #Bypass offset (0 = FALSE, 1 = TRUE)
-               bypass_flags = c(t_bypass = 0, j_bypass = 1, l_bypass = 0, 
+               bypass_flags = c(t_bypass = 1, j_bypass = 0, l_bypass = 0, 
                                 jl_bypass = 0, jlt_bypass = 0, 
                                 mu_bypass = 1), #The full by-pass model does not converge because of the H vector
                
@@ -67,11 +67,11 @@ fit <- f_model(raw_file = file,
                compare_AIC = TRUE, #compare the AIC to previous model runs
                getsd = FALSE, #must be turned on for marginal plots, but turned off for management plots
                save_to_file = FALSE, #save the fit to a file
-               save_file = "bias_sim_n2.rData", #file name of the saved fit
+               save_file = "bias_sim.rData", #file name of the saved fit
                DHARMa_sim = FALSE, #do the DHARMa simulations
                bias_sim = FALSE, #Simulated bias of parameters
                bias_sim_n = 50, #
-               sim_size = 2, #Sample size experiment
+               sim_size = 1, #Sample size experiment
                proj_sim = 0, #Projection simulation
                proj_H = c(0.,0.,)) #Anisotropy simulation
 

@@ -329,7 +329,7 @@ template<class Type>
         y_re(t_i(i) , a_i(i) * t_bypass) +
         l_re(ll , a_i(i) * l_bypass) +
         j_re(jj , a_i(i) * j_bypass) +
-        z_jl(ss, a_i(i) * jlt_bypass) + //day X length X year
+        z_jl(ss, a_i(i) * jl_bypass) + //day X length X year
         z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))); //day X length X year
       
       proj(a_i(i),mm) +=  wt;     // 
@@ -418,6 +418,9 @@ template<class Type>
     j_re(j_int(i)) +
     mu;
   }
+  REPORT(mar_l);
+  REPORT(mar_j);
+  REPORT(mar_y);
   ADREPORT(mar_l);
   ADREPORT(mar_j);
   ADREPORT(mar_y);
