@@ -1,7 +1,10 @@
-f_bias_sim <- function(obj = obj,
-                           TMB_list = TMB_list,
-                           map = map,
-                           bias_sim_n = bias_sim_n,
+f_bias_sim <- function(opt = opt, 
+                       obj = obj,
+                       TMB_list = TMB_list,
+                       map = map,
+                       lwr = lwr,
+                       upr = upr,
+                       bias_sim_n = bias_sim_n,
                        sim_size = sim_size){
   
   
@@ -31,6 +34,8 @@ f_bias_sim <- function(obj = obj,
     sim_opt <- TMBhelper::fit_tmb( sim_obj,
                                loopnum = 1,
                                newtonsteps = 1,
+                               lower = rep(-7,length(sim_obj$par)),
+                               upper = rep(7,length(sim_obj$par)),
                                quiet = TRUE,
                                getsd = FALSE) # where Obj is a compiled TMB object
     
@@ -38,7 +43,7 @@ f_bias_sim <- function(obj = obj,
     
     sim_out[i,] <- sim_opt$par
     sim_proj[i,,,] <- sim_obj$rep$proj_y
-    
+    print(opt$par)
     print(paste("sys time", sys-Sys.time()))
   }
   # return(sim_out)

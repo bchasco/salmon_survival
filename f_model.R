@@ -54,6 +54,18 @@ f_model <- function(raw_file = raw_file,
   map <- #NA
   f_map(TMB_list)
 
+  map_names <- names(map)
+  map_names <- map_names[!(map_names%in%c(grep("_re",map_names),grep("z_",map_names)))]
+
+  #fixed effect parameter length  
+  par_names <- names(TMB_list$parameters)
+  par_names <- par_names[!(par_names%in%c(grep("_re",par_names),grep("z_",par_names)))]
+  par_names <- par_names[!(par_names%in%map_names)]
+  print(par_names)
+  print(map_names)
+  
+  upr <- rep(7,length(par_names))
+  lwr <- rep(-7,length(par_names))
 
   #TMB object
   obj <-   #NA
@@ -62,19 +74,23 @@ f_model <- function(raw_file = raw_file,
                    , TMB_list$parameters
                    , random=random
                    , map = map
+                    ,lower = lwr
+                    ,upper = upr  
                    , DLL=paste0("spde_aniso_wt_",version)
                    , sdreport = FALSE)
   print(obj$par)
   print(names(map))
+  
   #keep track of the mesh
   # obj$mesh <- mesh
-
   #Estimate the parameters
   if(bias_sim) getsd <- FALSE
   opt <- #NA
   TMBhelper::fit_tmb( obj,
                              loopnum = 1,
                              newtonsteps = 1,
+                      lower = rep(-7,length(obj$par)),
+                      upper = rep(7,length(obj$par)),
                              quiet = TRUE,
                              getsd = getsd) # where Obj is a compiled TMB object
 
@@ -82,9 +98,12 @@ f_model <- function(raw_file = raw_file,
   obj$rep <- obj$report()
 
   if(bias_sim){
-    bias_sim <- f_bias_sim(obj = obj,
+    bias_sim <- f_bias_sim(opt = opt,
+                           obj = obj,
                TMB_list = TMB_list,
                map = map,
+               lwr = lwr,
+               upr = upr,
                bias_sim_n = bias_sim_n,
                sim_size = sim_size)
   }else{

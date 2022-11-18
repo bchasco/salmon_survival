@@ -50,11 +50,13 @@ fit <- f_model(raw_file = file,
                re_flags = c(t_flag = 1, j_flag = 1, l_flag = 1, 
                             jl_flag = 0, jlt_flag = 1),
                
+               # re_flags <- 0
+               # 
                #R.E. statistical model (0 = i.i.d, 1 = AR1, 2 = R.W.) 
-               AR_flags = c(t_AR = 2, j_AR = 2, l_AR = 2), #AR1 with all by-pass does not converge, iid does, rw does
+               AR_flags = c(t_AR = 1, j_AR = 1, l_AR = 1), #AR1 with all by-pass does not converge, iid does, rw does
                
                #Bypass offset (0 = FALSE, 1 = TRUE)
-               bypass_flags = c(t_bypass = 1, j_bypass = 0, l_bypass = 0, 
+               bypass_flags = c(t_bypass = 0, j_bypass = 0, l_bypass = 0, 
                                 jl_bypass = 0, jlt_bypass = 0, 
                                 mu_bypass = 1), #The full by-pass model does not converge because of the H vector
                
@@ -64,14 +66,14 @@ fit <- f_model(raw_file = file,
                
                H_flag = 1, #flag for anisotropy
                version = "v11_6", #model version
-               compare_AIC = TRUE, #compare the AIC to previous model runs
+               compare_AIC = FALSE, #compare the AIC to previous model runs
                getsd = FALSE, #must be turned on for marginal plots, but turned off for management plots
-               save_to_file = FALSE, #save the fit to a file
-               save_file = "bias_sim.rData", #file name of the saved fit
+               save_to_file = TRUE, #save the fit to a file
+               save_file = "bias_sim_2n.rData", #file name of the saved fit
                DHARMa_sim = FALSE, #do the DHARMa simulations
-               bias_sim = FALSE, #Simulated bias of parameters
+               bias_sim = TRUE, #Simulated bias of parameters
                bias_sim_n = 50, #
-               sim_size = 1, #Sample size experiment
+               sim_size = 2, #Sample size experiment
                proj_sim = 0, #Projection simulation
                proj_H = c(0.,0.,)) #Anisotropy simulation
 
