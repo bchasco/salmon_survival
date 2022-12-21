@@ -3,7 +3,7 @@ f_management_projection <-function(df = df,
                                    rangeL = rangeL,
                                    rangeJ = rangeL){
   grid <- expand.grid('l' = m_proj$l,
-                             'j' = sort(m_proj$j))
+                      'j' = sort(m_proj$j))
   
   # print(nrow(df))
   tmp <- array(NA , dim = c(nrow(df),nrow(grid),ncol(grid)+1))

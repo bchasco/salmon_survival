@@ -55,12 +55,12 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
   parameters <- list(
     mu = -4
     ,bypass = 0
-    ,log_tau_jl = 0
+    # ,log_tau_jl = 0
     ,log_tau_jl2 = 0
     ,log_kappa_jl = 0
     ,ln_H_input_jl = c(0,0)
-    ,z_jl = array(0,c(mesh$spde_jl$n_s,
-                      b_flags['jl_bypass'] + 1)) #number of stations by the number of years
+    # ,z_jl = array(0,c(mesh$spde_jl$n_s,
+    #                   b_flags['jl_bypass'] + 1)) #number of stations by the number of years
     ,z_jlt = array(0,c(mesh$spde_jl$n_s,
                        b_flags['jlt_bypass'] + 1,
                        data$n_t)) #num
@@ -79,7 +79,7 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
     ,f_psil = 0
     ,f_psiy = 0
     ,f_psij = 0
-    ,f_psijl = 0
+    # ,f_psijl = 0
     ,f_psijlt = 0
   )
 

@@ -27,7 +27,6 @@ template<class Type>
   DATA_INTEGER(t_bypass);
   DATA_INTEGER(j_bypass);
   DATA_INTEGER(l_bypass);
-  DATA_INTEGER(jl_bypass);
   DATA_INTEGER(jlt_bypass);
 
   DATA_INTEGER(t_AR);
@@ -35,8 +34,6 @@ template<class Type>
   DATA_INTEGER(l_AR);
   
   DATA_INTEGER(jlt_flag);
-  DATA_INTEGER(jl_flag);
-  
   DATA_INTEGER( n_i );         // Total number of observations
   // DATA_INTEGER( n_s_jl );        //Number of vertices
   DATA_IVECTOR( x_s_jl );	      // Association of each station with a given vertex in SPDE mesh
@@ -58,11 +55,9 @@ template<class Type>
   PARAMETER(mu);
   PARAMETER(bypass);
   PARAMETER(log_kappa_jl);
-  PARAMETER(log_tau_jl);
   PARAMETER(log_tau_jl2);
   PARAMETER_VECTOR(ln_H_input_jl);
   PARAMETER_ARRAY(z_jlt);
-  PARAMETER_ARRAY(z_jl);
   PARAMETER_ARRAY(y_re);
   PARAMETER_ARRAY(l_re);
   PARAMETER_ARRAY(j_re);
@@ -75,12 +70,11 @@ template<class Type>
   PARAMETER(f_psiy);
   PARAMETER(f_psil);
   PARAMETER(f_psij);
-  PARAMETER(f_psijl);
+  // PARAMETER(f_psijl);
   PARAMETER(f_psijlt);
   
   
   Type tau_jl2 = exp(log_tau_jl2);
-  Type tau_jl = exp(log_tau_jl);
   Type kappa_jl = exp(log_kappa_jl);
   
   vector<Type> nll(10);
@@ -88,7 +82,7 @@ template<class Type>
   // Need to parameterize H matrix such that det(H)=1 (preserving volume) 
   // Note that H appears in (20) in Lindgren et al 2011
   matrix<Type> H_jl(2,2);
-  if((jlt_flag == 1) | (jl_flag == 1)){
+  if(jlt_flag==1){
     H_jl(0,0) = exp(ln_H_input_jl(0));
     H_jl(1,0) = ln_H_input_jl(1);
     H_jl(0,1) = ln_H_input_jl(1);
@@ -106,7 +100,6 @@ template<class Type>
   Type psi_l = 1/(1+exp(f_psil));
   Type psi_j = 1/(1+exp(f_psij));
   Type psi_y = 1/(1+exp(f_psiy));
-  Type psi_jl = 1/(1+exp(f_psijl));
   Type psi_jlt = 1/(1+exp(f_psijlt));
   
   
@@ -115,41 +108,28 @@ template<class Type>
 
   int n_t = 22;  
   //Scale the 2D variance  
+  // matrix<Type> ln_zexp_sp_jlt( n_s_jl, n_t);
   matrix<Type> jl_cov(2,2);
   jl_cov(0,0) = 1.;
   jl_cov(1,1) = 1.;
-  jl_cov(0,1) = psi_jl;
-  jl_cov(1,0) = psi_jl;
-  MVNORM_t<Type> jl_dnorm(jl_cov); 
-  if(jl_flag==1){
-    if(jl_bypass == 0){
-      nll(1) += SCALE(GMRF(Q_jl), 1/tau_jl)(z_jl.col(0));
-    }
-    if(jl_bypass == 1){
-      nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl)( z_jl );
-    }
-  }
-  
-  matrix<Type> jlt_cov(2,2);
-  jlt_cov(0,0) = 1.;
-  jlt_cov(1,1) = 1.;
-  jlt_cov(0,1) = psi_jlt;
-  jlt_cov(1,0) = psi_jlt;
+  jl_cov(0,1) = psi_jlt;
+  jl_cov(1,0) = psi_jlt;
   matrix<Type> z_sim(z_jlt.dim[0], z_jlt.dim[1] );
-  MVNORM_t<Type> jlt_dnorm(jlt_cov); 
+  MVNORM_t<Type> jl_dnorm(jl_cov); 
   if(jlt_flag==1){
     for(int t=0; t<n_t; t++){
       if(jlt_bypass == 0){
         nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
+            
             z_jlt.col(t) = GMRF(Q_jl).simulate();
             z_jlt.col(t) /= tau_jl2;
           } 
         }
       }
       if(jlt_bypass == 1){
-        nll(2) += SCALE(SEPARABLE(jlt_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
+        nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
             // z_jlt.col(t) =SEPARABLE(jl_dnorm, GMRF(Q_jl)).simulate();
@@ -167,17 +147,15 @@ template<class Type>
   y_cov(1,1) = sig_y * sig_y;
   y_cov(0,1) = psi_y * sig_y * sig_y;
   y_cov(1,0) = psi_y * sig_y * sig_y;
-  MVNORM_t<Type> y_dnorm(y_cov); 
   if(t_flag==1){
     if(t_AR == 2){
       if(t_bypass == 1){
-        nll(5) += y_dnorm(y_re.transpose().col(0));
         for(int i = 1; i < y_re.dim(0); i++){
-          nll(5) += y_dnorm(y_re.transpose().col(i) - y_re.transpose().col(i-1));
+          nll(4) += MVNORM(y_cov)(y_re.transpose().col(i)-y_re.transpose().col(i-1));
         }
       }
       if(t_bypass == 0){
-        nll(5) -= dnorm(y_re(0,0),Type(0.),Type(10.),true);
+        nll(4) -= dnorm(y_re(0,0),Type(0.),Type(10.),true);
         for(int i = 1; i < y_re.dim(0); i++){
           nll(5) -= dnorm(y_re(i,0),y_re(i-1,0),sig_y,true);
         }
@@ -211,19 +189,18 @@ template<class Type>
   l_cov(1,1) = sig_l * sig_l;
   l_cov(0,1) = psi_l * sig_l * sig_l;
   l_cov(1,0) = psi_l * sig_l * sig_l;
-  MVNORM_t<Type> l_dnorm(l_cov); 
   if(l_flag==1){
     if(l_AR == 2){
       if(l_bypass == 1){
-        nll(4) += l_dnorm(l_re.transpose().col(0));
         for(int i = 1; i < l_re.dim(0); i++){
-          nll(4) += l_dnorm(l_re.transpose().col(i) - l_re.transpose().col(i-1));
+          nll(4) += MVNORM(l_cov)(l_re.transpose().col(i)-l_re.transpose().col(i-1));
         }
+        // nll(4) += AR1(Type(0.99),MVNORM(l_cov))(l_re.transpose());
       }
       if(l_bypass == 0){
-        nll(4) -= dnorm(l_re(0,0),Type(0.),Type(10.),true);
+        nll(4) -= dnorm(l_re(0,0),Type(0.),Type(1.),true);
         for(int i = 1; i < l_re.dim(0); i++){
-          nll(4) -= dnorm(l_re(i,0),l_re(i-1,0),sig_l,true);
+          nll(5) -= dnorm(l_re(i,0),l_re(i-1,0),sig_l,true);
         }
       }
     }
@@ -265,7 +242,7 @@ template<class Type>
         }
       }
       if(j_bypass == 0){
-        nll(5) -= dnorm(j_re(0,0),Type(0.),Type(10.),true);
+        nll(5) -= dnorm(j_re(0,0),Type(0.),Type(1.),true);
         for(int i = 1; i < j_re.dim(0); i++){
           nll(5) -= dnorm(j_re(i,0),j_re(i-1,0),sig_j,true);
         }
@@ -312,8 +289,9 @@ template<class Type>
       y_re(t_i(i) , a_i(i) * t_bypass) +
       l_re(l_i(i) , a_i(i) * l_bypass) +
       j_re(j_i(i) , a_i(i) * j_bypass) +
-      z_jl(s_i_jl(i), a_i(i) * jl_bypass) + //day X length X year
-      z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+      //No boundary in when building spde
+      // z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+    z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
     
     nu_i(i) = exp(eta_i(i))/(1+exp(eta_i(i)));
 
@@ -329,7 +307,6 @@ template<class Type>
         y_re(t_i(i) , a_i(i) * t_bypass) +
         l_re(ll , a_i(i) * l_bypass) +
         j_re(jj , a_i(i) * j_bypass) +
-        z_jl(ss, a_i(i) * jl_bypass) + //day X length X year
         z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))); //day X length X year
       
       proj(a_i(i),mm) +=  wt;     // 
@@ -345,7 +322,6 @@ template<class Type>
   
   SIMULATE{
     for(int i = 0; i < n_i; i++){
-      Type tmp_total = total(i) * sim_size;
       surv(i) = rbinom( total(i), nu_i(i) );
     }
     REPORT(surv);
@@ -418,9 +394,6 @@ template<class Type>
     j_re(j_int(i)) +
     mu;
   }
-  REPORT(mar_l);
-  REPORT(mar_j);
-  REPORT(mar_y);
   ADREPORT(mar_l);
   ADREPORT(mar_j);
   ADREPORT(mar_y);

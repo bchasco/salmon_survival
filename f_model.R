@@ -61,8 +61,11 @@ f_model <- function(raw_file = raw_file,
   par_names <- names(TMB_list$parameters)
   par_names <- par_names[!(par_names%in%c(grep("_re",par_names),grep("z_",par_names)))]
   par_names <- par_names[!(par_names%in%map_names)]
-  print(par_names)
-  print(map_names)
+  
+  print("par_names")
+  print(par_names[order(par_names)])
+  print("map_names")
+  print(map_names[order(map_names)])
   
   upr <- rep(7,length(par_names))
   lwr <- rep(-7,length(par_names))
@@ -75,24 +78,24 @@ f_model <- function(raw_file = raw_file,
                    , random=random
                    , map = map
                     ,lower = lwr
-                    ,upper = upr  
+                    ,upper = upr
                    , DLL=paste0("spde_aniso_wt_",version)
                    , sdreport = FALSE)
   print(obj$par)
-  print(names(map))
+  # print(names(map))
   
   #keep track of the mesh
-  # obj$mesh <- mesh
+  obj$mesh <- mesh
   #Estimate the parameters
   if(bias_sim) getsd <- FALSE
   opt <- #NA
   TMBhelper::fit_tmb( obj,
-                             loopnum = 1,
-                             newtonsteps = 1,
-                      lower = rep(-7,length(obj$par)),
-                      upper = rep(7,length(obj$par)),
-                             quiet = TRUE,
-                             getsd = getsd) # where Obj is a compiled TMB object
+                     loopnum = 1,
+                     newtonsteps = 1,
+                    lower = rep(-7,length(obj$par)),
+                    upper = rep(7,length(obj$par)),
+                     quiet = TRUE,
+                     getsd = getsd) # where Obj is a compiled TMB object
 
   #Save the report
   obj$rep <- obj$report()
@@ -116,6 +119,7 @@ f_model <- function(raw_file = raw_file,
     tmp_list <- list(bypass_flags = bypass_flags,
                      AR_flags = AR_flags,
                      re_flags = re_flags,
+                     n_knots = n_knots,
                      AIC = round(opt$AIC,1))
 
     if(length(AIC_comp)==0){
@@ -124,10 +128,12 @@ f_model <- function(raw_file = raw_file,
       save(file="AIC_comp.rData",AIC_comp)
     }
     if(length(AIC_comp)>=1){
-      comps <- c('bypass_flags','re_flags','AR_flags')
+      comps <- c('bypass_flags','re_flags','AR_flags','n_knots')
       same <- FALSE
       for(ii in 1:length(AIC_comp)){
-        if(sum(unlist(AIC_comp[[ii]])[names(AIC_comp[[ii]])!='AIC']!=unlist(tmp_list)[names(AIC_comp[[ii]])!='AIC'])==0){
+        old_mod <- unlist(AIC_comp[[ii]])[names(AIC_comp[[ii]])!='AIC']
+        new_mod <- unlist(tmp_list)[names(AIC_comp[[ii]])!='AIC'] 
+        if(sum(old_mod!=new_mod)==0){
           same <- TRUE
           print("You've already run this model.")
           tmp_df <- as.data.frame(AIC_comp, col.names=paste('model',1:length(AIC_comp)))
@@ -176,6 +182,7 @@ f_model <- function(raw_file = raw_file,
     ,opt = opt
     ,mesh = mesh
     ,df = df
+    ,map = map
     ,TMB_list = TMB_list
     ,proj = projections
     ,bias_sim = bias_sim

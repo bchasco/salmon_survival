@@ -1,11 +1,11 @@
-f_plot_anisotropy(fit = fit){
+f_plot_anisotropy <- function(fit = fit){
   
   # Decomposition
   fit$bias_sim$sim_obj$re
   Eigen = eigen(fit$obj$rep$H_jl)
   rss = function(V) sqrt(sum(V[1]^2+V[2]^2))
-  Pos_Major = Eigen$vectors[,1]*Eigen$values[1] * repList[[bm]]$Range_raw_jl
-  Pos_Minor = Eigen$vectors[,2]*Eigen$values[2] * repList[[bm]]$Range_raw_jl
+  Pos_Major = Eigen$vectors[,1]*Eigen$values[1] * fit$obj$rep$Range_raw_jl
+  Pos_Minor = Eigen$vectors[,2]*Eigen$values[2] * fit$obj$rep$Range_raw_jl
   Range = 1.1 * c(-1,1) * max(abs( cbind(Pos_Major,Pos_Minor) ))
   
   # png("plot_anisotropy.png", unit="in", height=5, width = 5, res = 600)
