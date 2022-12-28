@@ -47,7 +47,7 @@ template<class Type>
   DATA_VECTOR(total); //total number of fish of observed
   DATA_VECTOR(surv); //data number of fish that survived
   DATA_STRUCT(spde_jl,spde_aniso_t);
-  DATA_SCALAR(sim_size);
+  // DATA_SCALAR(sim_size);
   DATA_INTEGER(proj_sim);
   DATA_VECTOR(proj_H);
   
@@ -122,7 +122,6 @@ template<class Type>
         nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
-            
             z_jlt.col(t) = GMRF(Q_jl).simulate();
             z_jlt.col(t) /= tau_jl2;
           } 
@@ -322,7 +321,7 @@ template<class Type>
   
   SIMULATE{
     for(int i = 0; i < n_i; i++){
-      surv(i) = rbinom( total(i), nu_i(i) );
+      surv(i) = rbinom( total(i) , nu_i(i) );
     }
     REPORT(surv);
   }
@@ -373,32 +372,76 @@ template<class Type>
   Type Range_raw_jl = sqrt(8.0) / exp( log_kappa_jl );
 
   REPORT(Range_raw_jl);
-  array<Type> mar_j(j_re.dim(0),3); 
+  array<Type> mar_j(j_re.dim(0),2); 
   vector<int> j_int(3);
-  j_int << 14,40,67;
-  for(int i = 0; i < 3; i++ ){
-    mar_j.col(i) = j_re.col(0) + j_re(j_int(i)) + mu;
+  j_int << 18,40,62; //90% quantiles
+  for(int i = 0; i < 2; i++ ){
+    for(int j = 0; j < j_re.dim(0); j++ ){
+      if(j_re.dim(1)>1){
+        mar_j(j,i) = log(invlogit(j_re(j,i) +
+          l_re(22) + //mean arrival length
+          mu + bypass * i));
+      }else{
+        mar_j(j,i) = log(invlogit(j_re(j,0) +  //univariate day random effects
+          l_re(22) + //mean arrival length
+          mu + bypass * i));
+      }
+    }
   }
+  
 
-  array<Type> mar_l(l_re.dim(0),3); 
+  array<Type> mar_l(l_re.dim(0),2); 
   vector<int> l_int(3);
-  l_int << 38,25,5;
-  for(int i = 0; i < 3; i++ ){
-    mar_l.col(i) = l_re.col(0) + l_re(l_int(i)) + mu;
+  l_int << 36,22,8; //90% quantiles
+  for(int i = 0; i < 2; i++ ){
+    for(int j = 0; j < l_re.dim(0); j++ ){
+      if(l_re.dim(1)>1){
+        mar_l(j,i) = log(invlogit(l_re(j,i) +
+          j_re(40) + //mean arrival day
+          mu + bypass *(i)));
+      }else{
+        mar_l(j,i) = log(invlogit(l_re(j,0) + //univariate length random effects
+          j_re(40) + //mean arrival day
+          mu + bypass *(i)));
+      }
+    }
   }
-
-  array<Type> mar_y(y_re.dim(0),3); 
-  for(int i = 0; i < 3; i++ ){
-    mar_y.col(i) = y_re.col(0) + 
-    l_re(l_int(i)) +
-    j_re(j_int(i)) +
-    mu;
+  
+  array<Type> mar_y(y_re.dim(0),2); 
+  for(int i = 0; i < 2; i++ ){
+    for(int j = 0; j < y_re.dim(0); j++ ){
+      if(y_re.dim(1)>1){
+        mar_y(j,i) = log(invlogit(y_re(j,i) +
+          l_re(25) + //mean length
+          j_re(40) + //mean arrival day
+          mu + bypass * (i)));
+      }else{
+        mar_y(j,i) = log(invlogit(y_re(j,0) + //univariate year random effects
+          l_re(40) + //mean length
+          j_re(25) + //mean arrival day
+          mu + bypass * (i)));
+      }
+    }
   }
+  
   ADREPORT(mar_l);
   ADREPORT(mar_j);
   ADREPORT(mar_y);
-  ADREPORT(mu);
-  ADREPORT(mu+bypass);
+  ADREPORT(log(mu));
+  ADREPORT(log(mu+bypass));
+  ADREPORT(log(1/tau_jl2));
+  ADREPORT(ln_sigl);
+  ADREPORT(ln_sigj);
+  ADREPORT(ln_sigy);
+  ADREPORT(log(phi_l));
+  ADREPORT(log(phi_j));
+  ADREPORT(log(phi_y));
+  // ADREPORT(log(phi_jlt));
+  ADREPORT(log(psi_l));
+  ADREPORT(log(psi_j));
+  ADREPORT(log(psi_y));
+  // ADREPORT(log(psi_jlt));
+  
   ADREPORT(proj);
   ADREPORT(proj_y);
   

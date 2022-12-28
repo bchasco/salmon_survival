@@ -80,24 +80,13 @@ for(bp in 1:nrow(bypass_mods)){
                                          'l' = c(4,0,-4)),
                      
                      #Bypass offset (0 = FALSE, 1 = TRUE)
-                     bypass_flags = b_tmp,#as.vector(bypass_mods[bp,]),
-                     # tmp1 <- as.vector(as.matrix(bypass_mods[bp,]))
-                     # names(tmp1) <- names(bypass_mods)
-                     # tmp <- c(t_bypass = 1, j_bypass = 0, l_bypass = 0,
-                     #                  jl_bypass = 0, #not implemented
-                     #                  jlt_bypass = 0, #deprecated
-                     #                  mu_bypass = 0)# #The full by-pass model does not converge because of the H vector
-                     
+                     bypass_flags = b_tmp,
                      
                      #Random effects (0 = leave out, 1 = include)
-                     re_flags = r_tmp,#unclass(as.matrix(re_mods[re,])),
-                       # c(t_flag = 1, j_flag = 1, l_flag = 1,
-                       #            jl_flag = 0, jlt_flag = 1),
-                     
+                     re_flags = r_tmp,
                      
                      #R.E. statistical model (0 = i.i.d, 1 = AR1, 2 = R.W.) 
-                     AR_flags = a_tmp,#unclass(as.matrix(AR_mods[ar,])),
-                     # c(t_AR = 0, j_AR = 0, l_AR = 0), #AR1 with all by-pass does not converge, iid does, rw does
+                     AR_flags = a_tmp,
                      
                      #TMB (random or fixed)
                      random = c("y_re", "l_re",#'z_jl', 
@@ -128,8 +117,6 @@ if(clear_AIC_comp){
   AIC_comp <- list()
   save(file="AIC_comp.rData",AIC_comp)
 }
-
-source("table_AIC_comp.r")
 
 print(Sys.time()-sys)
 print(fit$opt$par)

@@ -67,8 +67,8 @@ f_model <- function(raw_file = raw_file,
   print("map_names")
   print(map_names[order(map_names)])
   
-  upr <- rep(7,length(par_names))
-  lwr <- rep(-7,length(par_names))
+  upr <- rep(4,length(par_names))
+  lwr <- rep(-6,length(par_names))
 
   #TMB object
   obj <-   #NA
@@ -92,8 +92,8 @@ f_model <- function(raw_file = raw_file,
   TMBhelper::fit_tmb( obj,
                      loopnum = 1,
                      newtonsteps = 1,
-                    lower = rep(-7,length(obj$par)),
-                    upper = rep(7,length(obj$par)),
+                    lower = rep(-6.5,length(obj$par)),
+                    upper = rep(3,length(obj$par)),
                      quiet = TRUE,
                      getsd = getsd) # where Obj is a compiled TMB object
 
@@ -157,7 +157,7 @@ f_model <- function(raw_file = raw_file,
   d_res <- NA
   if(DHARMa_sim){
 
-    dH_sim <- replicate(100, {
+    dH_sim <- replicate(250, {
       simdata <- obj$simulate()$surv
     })
     d_res <- createDHARMa(dH_sim[,],

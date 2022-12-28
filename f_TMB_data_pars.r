@@ -48,7 +48,7 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
                ,n_s_jl = mesh$spde_jl$n_s
                ,m = mesh$tmb_proj
                ,m_imv = dim(mesh$tmb_proj)
-               ,sim_size = sim_size
+               # ,sim_size = sim_size
                ,proj_sim = proj_sim
                ,proj_H = proj_H
   )
