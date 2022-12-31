@@ -41,4 +41,4 @@ f_ggplot_bias_sim_fixed_effects2 <- function(fit = fit){
   return(df)
 }
 
-tmp <- f_ggplot_bias_sim_fixed_effects2(fit = fit)
+# tmp <- f_ggplot_bias_sim_fixed_effects2(fit = fit)

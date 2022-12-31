@@ -27,12 +27,13 @@ template<class Type>
   DATA_INTEGER(t_bypass);
   DATA_INTEGER(j_bypass);
   DATA_INTEGER(l_bypass);
+  DATA_INTEGER(jl_bypass);
   DATA_INTEGER(jlt_bypass);
 
   DATA_INTEGER(t_AR);
   DATA_INTEGER(j_AR);
   DATA_INTEGER(l_AR);
-  
+  DATA_INTEGER(jl_flag);
   DATA_INTEGER(jlt_flag);
   DATA_INTEGER( n_i );         // Total number of observations
   // DATA_INTEGER( n_s_jl );        //Number of vertices
@@ -55,8 +56,10 @@ template<class Type>
   PARAMETER(mu);
   PARAMETER(bypass);
   PARAMETER(log_kappa_jl);
+  PARAMETER(log_tau_jl);
   PARAMETER(log_tau_jl2);
   PARAMETER_VECTOR(ln_H_input_jl);
+  PARAMETER_ARRAY(z_jl);
   PARAMETER_ARRAY(z_jlt);
   PARAMETER_ARRAY(y_re);
   PARAMETER_ARRAY(l_re);
@@ -70,10 +73,11 @@ template<class Type>
   PARAMETER(f_psiy);
   PARAMETER(f_psil);
   PARAMETER(f_psij);
-  // PARAMETER(f_psijl);
+  PARAMETER(f_psijl);
   PARAMETER(f_psijlt);
   
   
+  Type tau_jl = exp(log_tau_jl);
   Type tau_jl2 = exp(log_tau_jl2);
   Type kappa_jl = exp(log_kappa_jl);
   
@@ -82,7 +86,7 @@ template<class Type>
   // Need to parameterize H matrix such that det(H)=1 (preserving volume) 
   // Note that H appears in (20) in Lindgren et al 2011
   matrix<Type> H_jl(2,2);
-  if(jlt_flag==1){
+  if((jlt_flag==1) | (jl_flag == 1)){
     H_jl(0,0) = exp(ln_H_input_jl(0));
     H_jl(1,0) = ln_H_input_jl(1);
     H_jl(0,1) = ln_H_input_jl(1);
@@ -100,6 +104,7 @@ template<class Type>
   Type psi_l = 1/(1+exp(f_psil));
   Type psi_j = 1/(1+exp(f_psij));
   Type psi_y = 1/(1+exp(f_psiy));
+  Type psi_jl = 1/(1+exp(f_psijl));
   Type psi_jlt = 1/(1+exp(f_psijlt));
   
   
@@ -107,15 +112,40 @@ template<class Type>
   SparseMatrix<Type> Q_jl = Q_spde(spde_jl,kappa_jl,H_jl);
 
   int n_t = 22;  
-  //Scale the 2D variance  
-  // matrix<Type> ln_zexp_sp_jlt( n_s_jl, n_t);
+  
   matrix<Type> jl_cov(2,2);
   jl_cov(0,0) = 1.;
   jl_cov(1,1) = 1.;
-  jl_cov(0,1) = psi_jlt;
-  jl_cov(1,0) = psi_jlt;
-  matrix<Type> z_sim(z_jlt.dim[0], z_jlt.dim[1] );
+  jl_cov(0,1) = psi_jl;
+  jl_cov(1,0) = psi_jl;
   MVNORM_t<Type> jl_dnorm(jl_cov); 
+  if(jl_flag==1){
+    if(jl_bypass == 0){
+      nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl)( z_jl);
+      if(proj_sim){
+        SIMULATE{
+          z_jl = GMRF(Q_jl).simulate();
+          z_jl /= tau_jl2;
+        }
+      }
+    }
+    if(jl_bypass == 1){
+      nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl)( z_jl);
+      if(proj_sim){ //multivariate simulation not implemented
+        SIMULATE{
+          // z_jlt.col(t) = SEPARABLE(jlt_dnorm, GMRF(Q_jl)).simulate();
+          // z_jlt.col(t) /= tau_jl2;
+        }
+      }
+    }
+  }
+
+  matrix<Type> jlt_cov(2,2);
+  jlt_cov(0,0) = 1.;
+  jlt_cov(1,1) = 1.;
+  jlt_cov(0,1) = psi_jlt;
+  jlt_cov(1,0) = psi_jlt;
+  MVNORM_t<Type> jlt_dnorm(jlt_cov); 
   if(jlt_flag==1){
     for(int t=0; t<n_t; t++){
       if(jlt_bypass == 0){
@@ -128,10 +158,10 @@ template<class Type>
         }
       }
       if(jlt_bypass == 1){
-        nll(2) += SCALE(SEPARABLE(jl_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
-        if(proj_sim){
+        nll(2) += SCALE(SEPARABLE(jlt_dnorm, GMRF(Q_jl)), 1/tau_jl2)( z_jlt.col(t));
+        if(proj_sim){ //multivariate simulation not implemented
           SIMULATE{
-            // z_jlt.col(t) =SEPARABLE(jl_dnorm, GMRF(Q_jl)).simulate();
+            // z_jlt.col(t) = SEPARABLE(jlt_dnorm, GMRF(Q_jl)).simulate();
             // z_jlt.col(t) /= tau_jl2;
           } 
         }
@@ -150,13 +180,13 @@ template<class Type>
     if(t_AR == 2){
       if(t_bypass == 1){
         for(int i = 1; i < y_re.dim(0); i++){
-          nll(4) += MVNORM(y_cov)(y_re.transpose().col(i)-y_re.transpose().col(i-1));
+          nll(3) += MVNORM(y_cov)(y_re.transpose().col(i)-y_re.transpose().col(i-1));
         }
       }
       if(t_bypass == 0){
-        nll(4) -= dnorm(y_re(0,0),Type(0.),Type(10.),true);
+        nll(3) -= dnorm(y_re(0,0),Type(0.),Type(10.),true);
         for(int i = 1; i < y_re.dim(0); i++){
-          nll(5) -= dnorm(y_re(i,0),y_re(i-1,0),sig_y,true);
+          nll(3) -= dnorm(y_re(i,0),y_re(i-1,0),sig_y,true);
         }
       }
     }
@@ -199,7 +229,7 @@ template<class Type>
       if(l_bypass == 0){
         nll(4) -= dnorm(l_re(0,0),Type(0.),Type(1.),true);
         for(int i = 1; i < l_re.dim(0); i++){
-          nll(5) -= dnorm(l_re(i,0),l_re(i-1,0),sig_l,true);
+          nll(3) -= dnorm(l_re(i,0),l_re(i-1,0),sig_l,true);
         }
       }
     }
@@ -288,24 +318,27 @@ template<class Type>
       y_re(t_i(i) , a_i(i) * t_bypass) +
       l_re(l_i(i) , a_i(i) * l_bypass) +
       j_re(j_i(i) , a_i(i) * j_bypass) +
+      z_jl(s_i_jl(i), a_i(i) * jl_bypass) +  //day X length
+      z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+    
       //No boundary in when building spde
       // z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
-    z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
     
-    nu_i(i) = exp(eta_i(i))/(1+exp(eta_i(i)));
+    nu_i(i) = invlogit(eta_i(i));
 
     //Do the projections
     for(int mm = 0; mm < m_imv(1); mm++){
       
-      int ss = m(i,mm,2);
-      int jj = m(i,mm,1);
-      int ll = m(i,mm,0);
+      int ss = m(i,mm,2); //location of managment action
+      int jj = m(i,mm,1); //day of management action
+      int ll = m(i,mm,0); //length of management action
       
       Type wt = total(i) * invlogit( mu +
         a_i(i) * bypass +
         y_re(t_i(i) , a_i(i) * t_bypass) +
         l_re(ll , a_i(i) * l_bypass) +
         j_re(jj , a_i(i) * j_bypass) +
+        z_jl(ss, a_i(i) * jl_bypass) + //day X length
         z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))); //day X length X year
       
       proj(a_i(i),mm) +=  wt;     // 
@@ -358,6 +391,7 @@ template<class Type>
   REPORT(l_re);
   REPORT(y_re);
   REPORT(j_re);
+  REPORT(z_jl);
   REPORT(z_jlt);
   REPORT(eta_i);
   REPORT(sig_l);

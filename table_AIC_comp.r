@@ -4,5 +4,5 @@ names(AIC_comp) <- paste("model",1:ncol(AIC_comp))
 AIC_comp <- t(t(AIC_comp)[order(AIC_comp['AIC',]),])
 print("Top three models")
 print(AIC_comp[,1:5])
-# write.csv(file="table_AIC_comp.csv",AIC_comp[,1:3])
+write.csv(file="table_AIC_comp_output.csv",AIC_comp[,1:5])
 

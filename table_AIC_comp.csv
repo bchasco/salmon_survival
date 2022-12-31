@@ -1,22 +1,17 @@
-Model input,Fixed and random effects,Model 1,Model 2,Model 3
-Random effect,Year,Included,Included,Included
-,Day,Included,Included,Included
-,Length,Included,Included,Included
-,Length/Day,Not included,Not included,Not included
-,Length/Day/Year,Included,Included,Included
-,,,,
-Migration pathway,Intercept,multivariate,univariate,multivariate
-,Year,multivariate,multivariate,univariate
-,Day,multivariate,multivariate,univariate
-,Length,multivariate,multivariate,univariate
-,Length/Day,Not included,Not included,Not included
-,Length/Day/Year,univariate,univariate,univariate
-,,,,
-Correlation between deviates,Year,AR1,AR1,AR1
-,Day,AR1,AR1,AR1
-,Length,AR1,AR1,AR1
-,Length/Day,Not included,Not included,Not included
-,Length/Day/Year,i.i.d,i.i.d,i.i.d
-,,,,
-AIC,,17233.4,17240.3,17244.1
-Delta AIC,,0,6.9,10.7
+Model input,Fixed and random effects,Model 1,Model 2,Model 3,Model 4,Model 5
+Fixed effect,Intercept,multivariate,univariate,multivariate,multivariate,multivariate
+,,,,,,
+Random effect,Year,multivariate,multivariate,multivariate,univariate,univariate
+,Day,multivariate,multivariate,univariate,univariate,univariate
+,Length,multivariate,multivariate,univariate,univariate,univariate
+,Length/Day,Not included,Not included,Not included,Not included,Not included
+,Length/Day/Year,univariate,univariate,univariate,univariate,univariate
+,,,,,,
+Correlation between deviates,Year,AR1,AR1,AR1,AR1,AR1
+,Day,AR1,AR1,RW,AR1,RW
+,Length,AR1,AR1,RW,AR1,RW
+,Length/Day,Not included,Not included,Not included,Not included,Not included
+,Length/Day/Year,i.i.d,i.i.d,i.i.d,i.i.d,i.i.d
+,,,,,,
+AIC,,17233.4,17240.3,17243.6,17244.1,17248.9
+Delta AIC,,0,6.9,10.7,,

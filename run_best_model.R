@@ -25,6 +25,7 @@ source("f_management_aggregate_comparison.r")
 source("f_management_annual_comparison.r")
 source("f_tau_sim.r")
 source("f_range_sim.r")
+source("f_ggplot_bias_sim_fixed_effects2.r")
 
 f_cpp("v11_6") #link the library
 
@@ -33,17 +34,17 @@ raw_data <- "C:/NOAA/LARGE_data/chin_survival_1998_2019_with_tagged_above.csv"
 sys <- Sys.time()
 
 #Bypass models to test
-bypass_mods = data.frame(t_bypass = c(0), 
-                         j_bypass = c(0), 
-                         l_bypass = c(0), 
-                         jl_bypass = c(0), #not implemented 
+bypass_mods = data.frame(t_bypass = c(1), 
+                         j_bypass = c(1), 
+                         l_bypass = c(1), 
+                         jl_bypass = c(0),  
                          jlt_bypass = c(0), #deprecated
-                         mu_bypass = c(1)) #The full by-pass model does not converge because of the H vector
+                         mu_bypass = c(0)) #The full by-pass model does not converge because of the H vector
 
 #AR models to test
 AR_mods = (data.frame(t_AR = c(1), 
-                     j_AR = c(2), 
-                     l_AR = c(2))) 
+                     j_AR = c(1), 
+                     l_AR = c(1))) 
 
 #Random effects to test
 re_mods = (data.frame(t_flag = c(1), 
@@ -51,6 +52,9 @@ re_mods = (data.frame(t_flag = c(1),
                      l_flag = c(1), 
                      jl_flag = c(0), 
                      jlt_flag = c(1)))
+
+save_to_file <- FALSE
+save_file <- "bias_sim_re_y_j_l_jlt_AR1_y_j_l_bypass_y_j_l.rData"
 
 for(bp in 1:nrow(bypass_mods)){
   for(ar in 1:nrow(AR_mods)){
@@ -90,17 +94,17 @@ for(bp in 1:nrow(bypass_mods)){
                      AR_flags = a_tmp,
                      
                      #TMB (random or fixed)
-                     random = c("y_re", "l_re",#'z_jl', 
-                                "j_re", "z_jlt"),
+                     random = c("y_re", "l_re", "j_re", 
+                                "z_jl", "z_jlt"),
                      
                      H_flag = 1, #flag for anisotropy (0 = FALSE, 1 = TRUE)
                      version = "v11_6", #model version
                      compare_AIC = FALSE, #compare the AIC to previous model runs
                      getsd = FALSE, #must be turned on for marginal plots, but turned off for management plots
-                     save_to_file = TRUE, #save the fit to a file
-                     save_file = "bias_sim_re_y_j_l_jlt_RW_j_l_bypassmu.rData", #file name of the saved fit
-                     DHARMa_sim = FALSE, #do the DHARMa simulations
-                     bias_sim = TRUE, #Simulated bias of parameters
+                     save_to_file = save_to_file, #save the fit to a file
+                     save_file = save_file, #file name of the saved fit
+                     DHARMa_sim = TRUE, #do the DHARMa simulations
+                     bias_sim = FALSE, #Simulated bias of parameters
                      bias_sim_n = 50, #
                      sim_size = 1, #Sample size experiment (deprecated in cpp)
                      proj_sim = 0, #Projection simulation
@@ -109,6 +113,7 @@ for(bp in 1:nrow(bypass_mods)){
   }
 }
   
+f_ggplot_bias_sim_fixed_effects2(fit = fit)
 
 
 print(Sys.time()-sys)

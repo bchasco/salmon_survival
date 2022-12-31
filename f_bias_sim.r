@@ -18,7 +18,7 @@ f_bias_sim <- function(opt = opt,
     sys <- Sys.time()
     #Set the year, day, and length random effects equal to their MLE values for the operating model.
     sim_i <- obj$simulate(complete=TRUE) #simulate data from the original model
-    print(paste(sum(sim_i$surv), "sim ", i , "out of ", bias_sim_n))
+    print(paste("sim ", i , "out of ", bias_sim_n))
     random <- obj$env$.random
     sim_obj <- MakeADFun(data=sim_i #create a new TMB model with the simulated data
                          , parameters=TMB_list$parameters
@@ -28,12 +28,13 @@ f_bias_sim <- function(opt = opt,
                          # , sdreport = FALSE
                          , checkParameterOrder = TRUE
                          , silent = TRUE)
-    print(sum(sim_obj$env$data$total))  
-    print(sum(sim_obj$env$data$surv))  
+    print(paste("Simulated total,", sum(sim_obj$env$data$total)))  
+    print(paste("Observed survivors,",sum(obj$env$data$surv[obj$env$data$a_i==0]),sum(obj$env$data$surv[obj$env$data$a_i==1])))  
+    print(paste("Simulated survivors,",sum(sim_obj$env$data$surv[sim_obj$env$data$a_i==0]),sum(sim_obj$env$data$surv[sim_obj$env$data$a_i==1])))  
     
     sim_opt <- TMBhelper::fit_tmb( sim_obj,
-                               loopnum = 1,
-                               newtonsteps = 1,
+                               loopnum = 2,
+                               newtonsteps = 2,
                                lower = rep(-6.5,length(sim_obj$par)),
                                upper = rep(3,length(sim_obj$par)),
                                quiet = TRUE,
@@ -47,7 +48,7 @@ f_bias_sim <- function(opt = opt,
     print(sim_opt$par)
     print("'true' estimate")
     print(opt$par)
-    print(paste("sys time", sys-Sys.time()))
+    print(paste("sys time", round(Sys.time()-sys,2)))
   }
   # return(sim_out)
   return(list(sim_out = sim_out

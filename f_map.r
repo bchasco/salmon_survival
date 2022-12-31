@@ -91,15 +91,15 @@ f_map <- function(TMBlist = TMB_list){
     jl_dim <- length(TMBlist$parameters$z_jl)
     map <- append(map,
                   list(
-                    # log_tau_jl = as.factor(NA)
-                    # ,f_psijl = as.factor(NA)
-                    # ,z_jl = as.factor(array(NA,c(jl_dim))) #num
+                    log_tau_jl = as.factor(NA)
+                    ,f_psijl = as.factor(NA)
+                    ,z_jl = as.factor(array(NA,c(jl_dim))) #num
                   ))
   }else{
     if(TMBlist$data$jl_bypass == 0){
       map <- append(map,
                     list(
-                      # f_psijl = as.factor(NA)
+                      f_psijl = as.factor(NA)
                     ))
     }
   }
@@ -111,7 +111,7 @@ f_map <- function(TMBlist = TMB_list){
                     ,ln_H_input_jl = as.factor(rep(NA,2))))
   }
   
-  # print(names(map))
+  print(names(map))
   return(map)
   
 }

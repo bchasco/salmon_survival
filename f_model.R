@@ -62,10 +62,10 @@ f_model <- function(raw_file = raw_file,
   par_names <- par_names[!(par_names%in%c(grep("_re",par_names),grep("z_",par_names)))]
   par_names <- par_names[!(par_names%in%map_names)]
   
-  print("par_names")
-  print(par_names[order(par_names)])
-  print("map_names")
-  print(map_names[order(map_names)])
+  # print("par_names")
+  # print(par_names[order(par_names)])
+  # print("map_names")
+  # print(map_names[order(map_names)])
   
   upr <- rep(4,length(par_names))
   lwr <- rep(-6,length(par_names))
@@ -81,6 +81,7 @@ f_model <- function(raw_file = raw_file,
                     ,upper = upr
                    , DLL=paste0("spde_aniso_wt_",version)
                    , sdreport = FALSE)
+  print("Estimated parameters")
   print(obj$par)
   # print(names(map))
   
@@ -90,8 +91,8 @@ f_model <- function(raw_file = raw_file,
   if(bias_sim) getsd <- FALSE
   opt <- #NA
   TMBhelper::fit_tmb( obj,
-                     loopnum = 1,
-                     newtonsteps = 1,
+                     loopnum = 2,
+                     newtonsteps = 2,
                     lower = rep(-6.5,length(obj$par)),
                     upper = rep(3,length(obj$par)),
                      quiet = TRUE,
@@ -123,7 +124,7 @@ f_model <- function(raw_file = raw_file,
                      AIC = round(opt$AIC,1))
 
     if(length(AIC_comp)==0){
-      print(unlist(tmp_list))
+      # print(unlist(tmp_list))
       AIC_comp[[1]] <- unlist(tmp_list)
       save(file="AIC_comp.rData",AIC_comp)
     }
@@ -137,7 +138,7 @@ f_model <- function(raw_file = raw_file,
           same <- TRUE
           print("You've already run this model.")
           tmp_df <- as.data.frame(AIC_comp, col.names=paste('model',1:length(AIC_comp)))
-          print(tmp_df)
+          # print(tmp_df)
           print(paste("The delta AIC for this model is", round(abs(min(tmp_df['AIC',])-tmp_df['AIC',ii]),1)))
           print(paste("See model", ii))
           break;
@@ -149,7 +150,7 @@ f_model <- function(raw_file = raw_file,
         save(file="AIC_comp.rData",AIC_comp)
         tmp_df <- as.data.frame(AIC_comp,
                                 col.names=paste('model',1:length(AIC_comp)))
-        print(tmp_df)
+        # print(tmp_df)
       }
     }
   }

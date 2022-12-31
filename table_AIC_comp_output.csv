@@ -1,0 +1,17 @@
+"","model 40","model 15","model 52","model 48","model 53"
+"bypass_flags.t_bypass",1,1,1,0,0
+"bypass_flags.j_bypass",1,1,0,0,0
+"bypass_flags.l_bypass",1,1,0,0,0
+"bypass_flags.jl_bypass",0,0,0,0,0
+"bypass_flags.jlt_bypass",0,0,0,0,0
+"bypass_flags.mu_bypass",1,0,1,1,1
+"AR_flags.t_AR",1,1,1,1,1
+"AR_flags.j_AR",1,1,2,1,2
+"AR_flags.l_AR",1,1,2,1,2
+"re_flags.t_flag",1,1,1,1,1
+"re_flags.j_flag",1,1,1,1,1
+"re_flags.l_flag",1,1,1,1,1
+"re_flags.jl_flag",0,0,0,0,0
+"re_flags.jlt_flag",1,1,1,1,1
+"n_knots",250,250,250,250,250
+"AIC",17233.4,17240.3,17243.6,17244.1,17248.9
