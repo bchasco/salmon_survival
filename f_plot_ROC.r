@@ -14,7 +14,8 @@ f_plot_ROC <- function(fit = fit){
 
   #create the roc   
   myRoc <- roc(obs,pred)
-  
+
+  print(myRoc)  
   png("f_plot_ROC.png", unit="in", height=5, width = 5, res = 600)
   rocobj <- plot.roc(obs, pred,
                      main = "Confidence intervals of specificity/sensitivity", 
@@ -24,6 +25,6 @@ f_plot_ROC <- function(fit = fit){
                      specificities = seq(0, 100, 5),           # on a select set of specificities
                      ci.type="shape", 
                      ci.col="#1c61b6AA")      # plot the CI as a blue shape
-  # plot(rocobj)
+  plot(rocobj)
   dev.off()
 }

@@ -1,6 +1,6 @@
 f_management_annual_comparison <- function(fit = fit,
                                               save_to_file = FALSE,
-                                              actions_to_include = c(3),
+                                              actions_to_include = c(1:9),
                                            height = 700,
                                            width = 400){
   library(ggplot2)

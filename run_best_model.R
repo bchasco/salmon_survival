@@ -12,12 +12,12 @@ library(RANN)
 source("f_cpp.r") #Compile new model
 source("f_raw_data.r") #Collect the raw data
 source("f_management_projection.r") #Compile new model
-source("f_mesh.r") #Build the mesh
-source("f_map.r") #Build the mesh
+source("f_mesh.r") #Build the mesh ******* used the saved mesh for consistency
+source("f_map.r") #Build the map
 source("f_TMB_data_pars.r") #Build the data and parameters lists
 source("f_model.r") #Sned everything to a TMb object and estimate
 source("f_bias_sim.r") #Function for loop over bias estimates
-# source("f_proj_sim.r") #Function for loop over bias estimates
+# source("f_proj_sim.r") #Function for projection models
 
 source("f_ggplot_interaction.r") #plot epsilon and or survival
 source("f_ggplot_marginal_effects.r") #plot epsilon and or survival
@@ -43,8 +43,8 @@ bypass_mods = data.frame(t_bypass = c(1),
 
 #AR models to test
 AR_mods = (data.frame(t_AR = c(1), 
-                     j_AR = c(1), 
-                     l_AR = c(1))) 
+                     j_AR = c(2), 
+                     l_AR = c(2))) 
 
 #Random effects to test
 re_mods = (data.frame(t_flag = c(1), 
@@ -54,7 +54,7 @@ re_mods = (data.frame(t_flag = c(1),
                      jlt_flag = c(1)))
 
 save_to_file <- FALSE
-save_file <- "bias_sim_re_y_j_l_jlt_AR1_y_j_l_bypass_y_j_l.rData"
+save_file <- "fit_Model_55.rData"
 
 for(bp in 1:nrow(bypass_mods)){
   for(ar in 1:nrow(AR_mods)){
@@ -97,13 +97,15 @@ for(bp in 1:nrow(bypass_mods)){
                      random = c("y_re", "l_re", "j_re", 
                                 "z_jl", "z_jlt"),
                      
-                     H_flag = 1, #flag for anisotropy (0 = FALSE, 1 = TRUE)
+                     loopnum = 1,
+                     newstep = 1,
+                     H_flag = 0, #flag for anisotropy (0 = FALSE, 1 = TRUE)
                      version = "v11_6", #model version
                      compare_AIC = FALSE, #compare the AIC to previous model runs
-                     getsd = FALSE, #must be turned on for marginal plots, but turned off for management plots
+                     getsd = TRUE, #must be turned on for marginal plots, but turned off for management plots
                      save_to_file = save_to_file, #save the fit to a file
                      save_file = save_file, #file name of the saved fit
-                     DHARMa_sim = TRUE, #do the DHARMa simulations
+                     DHARMa_sim = FALSE, #do the DHARMa simulations
                      bias_sim = FALSE, #Simulated bias of parameters
                      bias_sim_n = 50, #
                      sim_size = 1, #Sample size experiment (deprecated in cpp)
@@ -112,9 +114,11 @@ for(bp in 1:nrow(bypass_mods)){
     }
   }
 }
-  
-f_ggplot_bias_sim_fixed_effects2(fit = fit)
+
+# load("bias_sim_Model_55.rData")
+# f_ggplot_bias_sim_fixed_effects2(fit = fit)
 
 
 print(Sys.time()-sys)
 print(fit$opt$par)
+print(fit$opt$AIC)

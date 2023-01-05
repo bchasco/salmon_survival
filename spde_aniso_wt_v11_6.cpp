@@ -141,6 +141,8 @@ template<class Type>
   }
 
   matrix<Type> jlt_cov(2,2);
+  Type SigmaE = 1 / sqrt(4 * 3.14159 * exp(2*log_tau_jl2) * exp(2*log_kappa_jl));
+  
   jlt_cov(0,0) = 1.;
   jlt_cov(1,1) = 1.;
   jlt_cov(0,1) = psi_jlt;
@@ -149,6 +151,7 @@ template<class Type>
   if(jlt_flag==1){
     for(int t=0; t<n_t; t++){
       if(jlt_bypass == 0){
+        // nll(2) += GMRF(Q_jl)( z_jlt.col(t));
         nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
@@ -179,12 +182,13 @@ template<class Type>
   if(t_flag==1){
     if(t_AR == 2){
       if(t_bypass == 1){
+        nll(3) += MVNORM(y_cov)(y_re.transpose().col(0)); //REML
         for(int i = 1; i < y_re.dim(0); i++){
           nll(3) += MVNORM(y_cov)(y_re.transpose().col(i)-y_re.transpose().col(i-1));
         }
       }
       if(t_bypass == 0){
-        nll(3) -= dnorm(y_re(0,0),Type(0.),Type(10.),true);
+        nll(3) -= dnorm(y_re(0,0),Type(0.),sig_y,true);
         for(int i = 1; i < y_re.dim(0); i++){
           nll(3) -= dnorm(y_re(i,0),y_re(i-1,0),sig_y,true);
         }
@@ -221,13 +225,14 @@ template<class Type>
   if(l_flag==1){
     if(l_AR == 2){
       if(l_bypass == 1){
+        nll(5) += MVNORM(l_cov)(l_re.transpose().col(0)); //REML
         for(int i = 1; i < l_re.dim(0); i++){
           nll(4) += MVNORM(l_cov)(l_re.transpose().col(i)-l_re.transpose().col(i-1));
         }
         // nll(4) += AR1(Type(0.99),MVNORM(l_cov))(l_re.transpose());
       }
       if(l_bypass == 0){
-        nll(4) -= dnorm(l_re(0,0),Type(0.),Type(1.),true);
+        nll(4) -= dnorm(l_re(0,0),Type(0.),sig_l,true);
         for(int i = 1; i < l_re.dim(0); i++){
           nll(3) -= dnorm(l_re(i,0),l_re(i-1,0),sig_l,true);
         }
@@ -271,7 +276,7 @@ template<class Type>
         }
       }
       if(j_bypass == 0){
-        nll(5) -= dnorm(j_re(0,0),Type(0.),Type(1.),true);
+        nll(5) -= dnorm(j_re(0,0),Type(0.),sig_j,true);
         for(int i = 1; i < j_re.dim(0); i++){
           nll(5) -= dnorm(j_re(i,0),j_re(i-1,0),sig_j,true);
         }
@@ -344,7 +349,7 @@ template<class Type>
       proj(a_i(i),mm) +=  wt;     // 
       proj_y(a_i(i),mm,t_i(i)) +=  wt;     // 
         // 
-      proj(2,mm) += (eta_i(i)) * total(i);
+      proj(2,mm) += (eta_i(i)) * total(i); //Why do this
     }
     a_total(a_i(i)) += total(i);
     ay_total(a_i(i),t_i(i)) += total(i);
@@ -388,6 +393,9 @@ template<class Type>
   REPORT(phi_y);
   REPORT(phi_l);
   REPORT(phi_j);
+  REPORT(psi_y);
+  REPORT(psi_l);
+  REPORT(psi_j);
   REPORT(l_re);
   REPORT(y_re);
   REPORT(j_re);
@@ -401,7 +409,7 @@ template<class Type>
   REPORT(a_total);
   REPORT(ay_total);
   REPORT(proj_y);
-
+  REPORT(SigmaE);
   
   Type Range_raw_jl = sqrt(8.0) / exp( log_kappa_jl );
 
@@ -458,24 +466,46 @@ template<class Type>
     }
   }
   
+  Type tab_mu_a0 = log(invlogit(mu+l_re(22,0)+j_re(41,0)));
+  Type tab_mu_a1 = log(invlogit(mu+l_re(22,0)+j_re(39,1)));
+  Type tab_mu = log(invlogit(mu));
+  Type tab_tau = log(1/tau_jl2);
+  Type tab_rho = log(Range_raw_jl);
+  Type tab_sigl = log(sig_l);
+  Type tab_sigj = log(sig_j);
+  Type tab_sigy_derived = log(sig_y*pow(1-phi_y*phi_y,0.5));
+  Type tab_sigy = log(sig_y);
+  Type tab_sigmaE = log(SigmaE);
+  Type tab_phi_l = logit(phi_l);
+  Type tab_phi_j = logit(phi_j);
+  Type tab_phi_y = logit(phi_y);
+  Type tab_psi_l = logit(psi_l);
+  Type tab_psi_j = logit(psi_j);
+  Type tab_psi_y = logit(psi_y);
+  vector<Type> tab_h(2);
+  tab_h(0) = exp(ln_H_input_jl(0));
+  tab_h(1) = exp(ln_H_input_jl(1));
+  
+  
   ADREPORT(mar_l);
   ADREPORT(mar_j);
   ADREPORT(mar_y);
   ADREPORT(log(mu));
-  ADREPORT(log(mu+bypass));
-  ADREPORT(log(1/tau_jl2));
-  ADREPORT(ln_sigl);
-  ADREPORT(ln_sigj);
-  ADREPORT(ln_sigy);
-  ADREPORT(log(phi_l));
-  ADREPORT(log(phi_j));
-  ADREPORT(log(phi_y));
-  // ADREPORT(log(phi_jlt));
-  ADREPORT(log(psi_l));
-  ADREPORT(log(psi_j));
-  ADREPORT(log(psi_y));
-  // ADREPORT(log(psi_jlt));
-  
+  ADREPORT(tab_mu_a0);
+  ADREPORT(tab_mu_a1);
+  ADREPORT(tab_mu);
+  ADREPORT(tab_tau);
+  ADREPORT(tab_rho);
+  ADREPORT(tab_sigl);
+  ADREPORT(tab_sigj);
+  ADREPORT(tab_sigy);
+  ADREPORT(tab_sigmaE);
+  ADREPORT(tab_phi_l);
+  ADREPORT(tab_phi_j);
+  ADREPORT(tab_phi_y);
+  ADREPORT(tab_psi_l);
+  ADREPORT(tab_psi_j);
+  ADREPORT(tab_psi_y);
   ADREPORT(proj);
   ADREPORT(proj_y);
   

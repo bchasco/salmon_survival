@@ -1,6 +1,6 @@
 f_management_aggregate_comparison <- function(fit = fit,
                                               save_to_file = FALSE,
-                                              width = 400,
+                                              width = 800,
                                               height = 400,
                                               res = 100,
                                               actions_to_include = NA,
@@ -28,32 +28,33 @@ f_management_aggregate_comparison <- function(fit = fit,
     theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
                        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
     ylab("Smolt to adult survival") +
-    xlab("Management action") + 
+    xlab("Management action") +
     geom_errorbar(aes(ymin=(proj-1.96*sd), ymax=(proj+1.96*sd), colour = a), width=.2,
                   position=position_dodge(0.5)) +
-    # ylim(0.006,0.0135) +
+    ylim(0.006,0.0135) +
     geom_hline(yintercept = sum(fit$df$ns[fit$df$a==0])/sum(fit$df$nt[fit$df$a==0]), colour="#619CFF", size=1, alpha=0.5) +
     geom_hline(yintercept = sum(fit$df$ns[fit$df$a==1])/sum(fit$df$nt[fit$df$a==1]), colour="#F8766D", size=1, alpha=0.5) +
-    # geom_hline(yintercept = sum(fit$df$ns[])/sum(fit$df$nt[]), colour = "#F8766D", size=3, alpha=0.5) +
-    geom_point(aes(x=as.factor(id), y=(proj),colour=a), 
-               size=4, 
+    geom_hline(yintercept = sum(fit$df$ns[])/sum(fit$df$nt[]), colour = "grey", size=3, alpha=0.5) +
+    geom_point(aes(x=as.factor(id), y=(proj),colour=a),
+               size=4,
                shape=15,
                position=position_dodge(0.5)) +
     theme(axis.text.x = element_text(angle = 0)) +
-    scale_x_discrete(labels= actionNames[actions_to_include]) + 
+    scale_x_discrete(labels= actionNames[actions_to_include]) +
     guides(colour=guide_legend(title="Migration\npathway"))
-  
-  
+
+
   if(save_to_file){
-    png("f_ggplot_management_aggregate_comparison.png", 
-        width=width, height = height, 
+    png("f_ggplot_management_aggregate_comparison.png",
+        width=width, height = height,
         res=res,
         pointsize = point_size)
   }
-  
+
   print(g)
-  
+
   if(save_to_file) dev.off()
+  return(g)
 }
 
 # dev.off()

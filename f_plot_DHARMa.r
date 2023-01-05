@@ -1,5 +1,5 @@
 f_plot_DHARMa <- function(fit = fit,
-                          nsample = 10){
+                          nsample = 250){
 
   sim <- replicate(nsample, {
     simdata <- fit$obj$simulate(complete = TRUE)

@@ -5,8 +5,12 @@ f_tau_sim <- function(fit = fit,
                       xlim = c(-100,150),
                       height = 300,
                       width = 300,
+                      alpha = 0.6,
+                      action = 1,
                       point_size = 16,
+                      show.legend = TRUE,
                       res = 300){
+  
   o.tau <- fit$obj$env$last.par['log_tau_jl2'] 
   sig <- 1/exp(o.tau)
   sig <- sig*c(0.5,1,2)
@@ -25,29 +29,41 @@ f_tau_sim <- function(fit = fit,
     jcnt <- jcnt + 1
   }
   
-  x0.5 <- round(sum(na.omit(c(proj_sim[,1,1:2,3,])<0))/length(na.omit(c(proj_sim[,1,1:2,3,])))*100,1)
-  df <- data.frame(val = c(proj_sim[,1,1:2,3,]),
-                   var=rep(paste0("0.5x (",x0.5,"%)"),length(c(proj_sim[,1,1:2,3,]))))
-  x1 <- round(sum(na.omit(c(proj_sim[,2,1:2,3,])<0))/length(na.omit(c(proj_sim[,2,1:2,3,])))*100,1)
+  x0.5 <- round(sum(na.omit(c(proj_sim[,1,1:2,action,])<0))/
+                  length(na.omit(c(proj_sim[,1,1:2,action,])))*100,1)
+  df <- data.frame(val = c(proj_sim[,1,1:2,action,]),
+                   var=rep(paste0("0.5x (",x0.5,"%)"),
+                           length(c(proj_sim[,1,1:2,action,]))))
+  
+  x1 <- round(sum(na.omit(c(proj_sim[,2,1:2,action,])<0))/
+                length(na.omit(c(proj_sim[,2,1:2,action,])))*100,1)
   df <- rbind(df,
-              data.frame(val = c(proj_sim[,2,1:2,3,]),
-                         var=rep(paste0("1x (",x1,"%)"),length(c(proj_sim[,2,1:2,3,])))))
-  x2 <- round(sum(na.omit(c(proj_sim[,3,1:2,3,])<0))/length(na.omit(c(proj_sim[,3,1:2,3,])))*100,1)
+              data.frame(val = c(proj_sim[,2,1:2,action,]),
+                         var=rep(paste0("1x (",x1,"%)"),
+                                 length(c(proj_sim[,2,1:2,action,])))))
+  
+  x2 <- round(sum(na.omit(c(proj_sim[,3,1:2,action,])<0))/
+                length(na.omit(c(proj_sim[,3,1:2,action,])))*100,1)
+  
   df <- rbind(df,
-              data.frame(val = c(proj_sim[,3,1:2,3,]),
-                         var=rep(paste0("2x (",x2,"%)"),length(c(proj_sim[,3,1:2,3,])))))
+              data.frame(val = c(proj_sim[,3,1:2,action,]),
+                         var=rep(paste0("2x (",x2,"%)"),
+                                 length(c(proj_sim[,3,1:2,action,])))))
   
   g <- ggplot(df, aes(x=val)) +
-    facet_wrap(~var, ncol = 1, scales = "free") +
-    geom_histogram(aes(), alpha=0.5, position="identity", show.legend = FALSE) +
+    # facet_wrap(~var, ncol = 1, scales = "free") +
+    geom_histogram(aes(fill = var), 
+                   alpha=alpha, 
+                   position="identity", 
+                   show.legend = show.legend) +
     xlab("Percent change in annual survival") + 
-    ylab("") +
+    ylab("Frequency") +
     xlim(xlim) +
     theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),
                        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
     theme(panel.background = element_rect(fill = NA)) + 
     geom_vline(xintercept = 0) + 
-    guides(fill=guide_legend(title="Interaction\nvariance"))
+    guides(fill=guide_legend(title="Variance"))
   
   if(save_to_file){
     png(file = "f_tau_sim.png",

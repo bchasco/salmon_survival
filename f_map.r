@@ -110,6 +110,11 @@ f_map <- function(TMBlist = TMB_list){
                     log_kappa_jl = as.factor(NA)
                     ,ln_H_input_jl = as.factor(rep(NA,2))))
   }
+
+  if(TMBlist$data$H_flag == 0){
+    map <- append(map,
+                  list(ln_H_input_jl = as.factor(rep(NA,2))))
+  }
   
   print(names(map))
   return(map)

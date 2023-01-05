@@ -92,6 +92,8 @@ for(bp in 1:nrow(bypass_mods)){
                      random = c("y_re", "l_re",#'z_jl', 
                                 "j_re", "z_jlt"),
                      
+                     loopnum = 1,
+                     newstep = 1,
                      H_flag = 1, #flag for anisotropy (0 = FALSE, 1 = TRUE)
                      version = "v11_6", #model version
                      compare_AIC = TRUE, #compare the AIC to previous model runs

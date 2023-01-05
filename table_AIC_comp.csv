@@ -1,17 +1,17 @@
 Model input,Fixed and random effects,Model 1,Model 2,Model 3,Model 4,Model 5
-Fixed effect,Intercept,multivariate,univariate,multivariate,multivariate,multivariate
+Fixed effect,Intercept,univariate,univariate,univariate,univariate,univariate
 ,,,,,,
-Random effect,Year,multivariate,multivariate,multivariate,univariate,univariate
-,Day,multivariate,multivariate,univariate,univariate,univariate
-,Length,multivariate,multivariate,univariate,univariate,univariate
+Random effect,Year,multivariate,multivariate,multivariate,multivariate,multivariate
+,Day,multivariate,multivariate,multivariate,multivariate,multivariate
+,Length,multivariate,univariate,univariate,multivariate,multivariate
 ,Length/Day,Not included,Not included,Not included,Not included,Not included
 ,Length/Day/Year,univariate,univariate,univariate,univariate,univariate
 ,,,,,,
-Correlation between deviates,Year,AR1,AR1,AR1,AR1,AR1
-,Day,AR1,AR1,RW,AR1,RW
-,Length,AR1,AR1,RW,AR1,RW
+Correlation between deviates,Year,AR1,AR1,AR1,AR1,RW
+,Day,RW,RW,AR1,AR1,RW
+,Length,RW,RW,AR1,AR1,RW
 ,Length/Day,Not included,Not included,Not included,Not included,Not included
 ,Length/Day/Year,i.i.d,i.i.d,i.i.d,i.i.d,i.i.d
 ,,,,,,
-AIC,,17233.4,17240.3,17243.6,17244.1,17248.9
-Delta AIC,,0,6.9,10.7,,
+AIC,,17232.3,17232.4,17240.5,17240.6,17240.8
+Delta AIC,,0,0.1,8.2,8.3,8.5

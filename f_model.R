@@ -8,6 +8,8 @@ f_model <- function(raw_file = raw_file,
                    version = version,
                    n_knots = n_knots,
                    random = random,
+                   loopnum = loopnum,
+                   newstep = newstep,
                    compare_AIC = compare_AIC,
                    getsd = getsd,
                    m_proj = proj,
@@ -32,14 +34,16 @@ f_model <- function(raw_file = raw_file,
                                        rangeL = rangeL)
   
   #create the INLA mesh
-  mesh <- f_mesh(data = df,
-                 n_knots = n_knots,
-                 projections = projections)
+  # mesh <- f_mesh(data = df,
+  #                n_knots = n_knots,
+  #                projections = projections)
 
+  #load the save mesh called myMesh
+  load("mesh_250_knots.rData")
   
   # #Create the data and parameters objects for TMB
   TMB_list <- f_TMB_data_pars(df = df,
-                              mesh = mesh,
+                              mesh = myMesh,
                               by_pass = 1,
                               AR_flags = AR_flags,
                               H_flag = H_flag,
@@ -70,6 +74,11 @@ f_model <- function(raw_file = raw_file,
   upr <- rep(4,length(par_names))
   lwr <- rep(-6,length(par_names))
 
+  #estimate the jlt random effects in the second phase
+  # if(re_flags['jlt_flag']){
+  #   tmp_map
+  # }
+  
   #TMB object
   obj <-   #NA
   MakeADFun(TMB_list$data
@@ -86,13 +95,13 @@ f_model <- function(raw_file = raw_file,
   # print(names(map))
   
   #keep track of the mesh
-  obj$mesh <- mesh
+  obj$mesh <- myMesh
   #Estimate the parameters
-  if(bias_sim) getsd <- FALSE
+  # if(bias_sim) getsd <- FALSE
   opt <- #NA
   TMBhelper::fit_tmb( obj,
-                     loopnum = 2,
-                     newtonsteps = 2,
+                     loopnum = loopnum,
+                     newtonsteps = newstep,
                     lower = rep(-6.5,length(obj$par)),
                     upper = rep(3,length(obj$par)),
                      quiet = TRUE,
@@ -102,12 +111,13 @@ f_model <- function(raw_file = raw_file,
   obj$rep <- obj$report()
 
   if(bias_sim){
-    bias_sim <- f_bias_sim(opt = opt,
+    bias_sim <- f_bias_sim(df = df,
+                           opt = opt,
                            obj = obj,
                TMB_list = TMB_list,
                map = map,
-               lwr = lwr,
-               upr = upr,
+               lwr = rep(-6.5,length(obj$par)),
+               upr = rep(3,length(obj$par)),
                bias_sim_n = bias_sim_n,
                sim_size = sim_size)
   }else{
@@ -158,7 +168,7 @@ f_model <- function(raw_file = raw_file,
   d_res <- NA
   if(DHARMa_sim){
 
-    dH_sim <- replicate(250, {
+    dH_sim <- replicate(500, {
       simdata <- obj$simulate()$surv
     })
     d_res <- createDHARMa(dH_sim[,],
@@ -171,7 +181,7 @@ f_model <- function(raw_file = raw_file,
     fit <- list(
       obj = obj
       ,opt = opt
-      ,mesh = mesh
+      ,mesh = myMesh
       ,df = df
       ,TMB_list = TMB_list
       ,bias_sim = bias_sim
@@ -181,7 +191,7 @@ f_model <- function(raw_file = raw_file,
   return(list(
     obj = obj
     ,opt = opt
-    ,mesh = mesh
+    ,mesh = myMesh
     ,df = df
     ,map = map
     ,TMB_list = TMB_list

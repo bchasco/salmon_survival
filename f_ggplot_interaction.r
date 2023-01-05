@@ -2,7 +2,7 @@ f_ggplot_interaction <- function(fit = fit,
                                  years_to_plot = c(1999,2019),
                                  file = "f_ggplot_interaction.png",
                                  save_to_file = FALSE,
-                                 gg_ncol=4,
+                                 gg_ncol=2,
                                  arrange_ncol = 2,
                                  bypass_cond = 2,
                                  observed_max = 0.2,
@@ -88,9 +88,9 @@ f_ggplot_interaction <- function(fit = fit,
   
   
   # print(head(DF[DF$tt%in%sampleYears,]))
-  max_surv <- 0.0600#max(plogis(DF[DF$tt%in%sampleYears,]$Survival[,bypass_cond]))
+  max_surv <- 0.0800#max(plogis(DF[DF$tt%in%sampleYears,]$Survival[,bypass_cond]))
   min_surv <- 0.0#min(plogis(DF[DF$tt%in%sampleYears,]$Survival[,bypass_cond]))
-  mid_surv <- plogis(fit$obj$rep$mu + fit$obj$rep$bypass * (bypass_cond - 1))
+  mid_surv <- exp(fit$opt$SD$value[names(fit$opt$SD$value)=='tab_mu_a0'])
   breaks <- c(min_surv, mid_surv, max_surv)
   print(breaks)
   p2 <- ggplot(data = DF[DF$tt%in%sampleYears,], aes(x = as.Date(x, origin = as.Date("2018-01-01")), y = y,
@@ -157,18 +157,18 @@ f_ggplot_interaction <- function(fit = fit,
       plotlist <- list(p1,p2,p3)
   }
 
-  p <- ggarrange(plotlist = plotlist,
-                 labels = LETTERS[1:length(plotlist)],
-                 ncol = length(plotlist))
-
-  # Annotate the figure by adding a common labels
-  annotate_figure(p,
-                  bottom = text_grob("Migration date past Lower Granite Dam", color = "black",
-                                     hjust = 1, x = 0.65, size = 11))
-
-  print(p)
-  if(save_to_file) png(file, height=400, width=700, pointsize = 12)
-  print(p)
+  # p <- ggarrange(plotlist = plotlist,
+  #                labels = LETTERS[1:length(plotlist)],
+  #                ncol = length(plotlist))
+  # 
+  # # Annotate the figure by adding a common labels
+  # annotate_figure(p,
+  #                 bottom = text_grob("Migration date past Lower Granite Dam", color = "black",
+  #                                    hjust = 1, x = 0.65, size = 11))
+  # 
+  print(p3)
+  if(save_to_file) png(file, height=500, width=700, pointsize = 12)
+  print(p3)
   if(save_to_file) dev.off()
   
   # print(p1)
