@@ -90,11 +90,11 @@ f_model <- function(raw_file = raw_file,
                     ,upper = upr
                    , DLL=paste0("spde_aniso_wt_",version)
                    , sdreport = FALSE)
-  print("Estimated parameters")
-  print(obj$par)
-  # print(names(map))
-  
-  #keep track of the mesh
+  # print("Estimated parameters")
+  # print(obj$par)
+  # # print(names(map))
+  # 
+  # #keep track of the mesh
   obj$mesh <- myMesh
   #Estimate the parameters
   # if(bias_sim) getsd <- FALSE
@@ -190,13 +190,13 @@ f_model <- function(raw_file = raw_file,
   }
   return(list(
     obj = obj
-    ,opt = opt
-    ,mesh = myMesh
-    ,df = df
-    ,map = map
-    ,TMB_list = TMB_list
-    ,proj = projections
-    ,bias_sim = bias_sim
+    , opt = opt
+    , mesh = myMesh
+    , df = df
+    , map = map
+    , TMB_list = TMB_list
+    , proj = projections
+    , bias_sim = bias_sim
 ))
 }
 

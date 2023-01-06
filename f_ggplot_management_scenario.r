@@ -1,6 +1,6 @@
 f_ggplot_management_scenarios <- function(fit = fit,
                                    alpha = 0.6,
-                                   n_sim = 1,
+                                   n_sim = 50,
                                    save_to_file = TRUE,
                                    file = "f_ggplot_management_scenarios.png",
                                    action = 1){

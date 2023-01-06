@@ -63,7 +63,7 @@ f_tau_sim <- function(fit = fit,
                        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
     theme(panel.background = element_rect(fill = NA)) + 
     geom_vline(xintercept = 0) + 
-    guides(fill=guide_legend(title="Variance"))
+    guides(fill=guide_legend(title="\u03C4"))
   
   if(save_to_file){
     png(file = "f_tau_sim.png",

@@ -11,7 +11,7 @@ bool isNA(Type x){
 }
 
 template<class Type>
-  Type objective_function<Type>::operator() ()
+Type objective_function<Type>::operator() ()
 {
   // feenableexcept(FE_INVALID | FE_OVERFLOW | FE_DIVBYZERO | FE_UNDERFLOW); // Extra line needed
   
@@ -29,7 +29,7 @@ template<class Type>
   DATA_INTEGER(l_bypass);
   DATA_INTEGER(jl_bypass);
   DATA_INTEGER(jlt_bypass);
-
+  
   DATA_INTEGER(t_AR);
   DATA_INTEGER(j_AR);
   DATA_INTEGER(l_AR);
@@ -45,7 +45,7 @@ template<class Type>
   DATA_IVECTOR( a_i );	      // bypass
   DATA_IARRAY(m);   //management projections
   DATA_IVECTOR(m_imv)
-  DATA_VECTOR(total); //total number of fish of observed
+    DATA_VECTOR(total); //total number of fish of observed
   DATA_VECTOR(surv); //data number of fish that survived
   DATA_STRUCT(spde_jl,spde_aniso_t);
   // DATA_SCALAR(sim_size);
@@ -110,7 +110,7 @@ template<class Type>
   
   //2-D smoother
   SparseMatrix<Type> Q_jl = Q_spde(spde_jl,kappa_jl,H_jl);
-
+  
   int n_t = 22;  
   
   matrix<Type> jl_cov(2,2);
@@ -124,8 +124,8 @@ template<class Type>
       nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl)( z_jl);
       if(proj_sim){
         SIMULATE{
-          z_jl = GMRF(Q_jl).simulate();
-          z_jl /= tau_jl2;
+          // z_jl = GMRF(Q_jl).simulate();
+          // z_jl /= tau_jl2;
         }
       }
     }
@@ -139,7 +139,7 @@ template<class Type>
       }
     }
   }
-
+  
   matrix<Type> jlt_cov(2,2);
   Type SigmaE = 1 / sqrt(4 * 3.14159 * exp(2*log_tau_jl2) * exp(2*log_kappa_jl));
   
@@ -151,13 +151,12 @@ template<class Type>
   if(jlt_flag==1){
     for(int t=0; t<n_t; t++){
       if(jlt_bypass == 0){
-        // nll(2) += GMRF(Q_jl)( z_jlt.col(t));
         nll(2) += SCALE(GMRF(Q_jl), 1/tau_jl2)( z_jlt.col(t));
         if(proj_sim){
           SIMULATE{
             z_jlt.col(t) = GMRF(Q_jl).simulate();
             z_jlt.col(t) /= tau_jl2;
-          } 
+          }
         }
       }
       if(jlt_bypass == 1){
@@ -166,13 +165,13 @@ template<class Type>
           SIMULATE{
             // z_jlt.col(t) = SEPARABLE(jlt_dnorm, GMRF(Q_jl)).simulate();
             // z_jlt.col(t) /= tau_jl2;
-          } 
+          }
         }
       }
     }
   }
-
-
+  
+  
   
   matrix<Type> y_cov(2,2);
   y_cov(0,0) = sig_y * sig_y;
@@ -214,7 +213,7 @@ template<class Type>
         }
       }
     }
-    
+
   }
   
   matrix<Type> l_cov(2,2);
@@ -317,43 +316,44 @@ template<class Type>
   ay_total.setZero();
   
   for(int i = 0; i < n_i; i++){
-
-    eta_i(i) =  mu +
-      a_i(i) * bypass +
-      y_re(t_i(i) , a_i(i) * t_bypass) +
-      l_re(l_i(i) , a_i(i) * l_bypass) +
-      j_re(j_i(i) , a_i(i) * j_bypass) +
-      z_jl(s_i_jl(i), a_i(i) * jl_bypass) +  //day X length
-      z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
     
-      //No boundary in when building spde
-      // z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+    eta_i(i) =  mu +
+    a_i(i) * bypass +
+    y_re(t_i(i) , a_i(i) * t_bypass) +
+    l_re(l_i(i) , a_i(i) * l_bypass) +
+    j_re(j_i(i) , a_i(i) * j_bypass) +
+    z_jl(s_i_jl(i), a_i(i) * jl_bypass) +  //day X length
+    z_jlt(s_i_jl(i), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
+    
+    //No boundary in when building spde
+    // z_jlt(x_s_jl(s_i_jl(i)), a_i(i) * jlt_bypass, t_i(i)); //day X length X year
     
     nu_i(i) = invlogit(eta_i(i));
-
+    
     //Do the projections
     for(int mm = 0; mm < m_imv(1); mm++){
       
       int ss = m(i,mm,2); //location of managment action
       int jj = m(i,mm,1); //day of management action
       int ll = m(i,mm,0); //length of management action
-      
+
       Type wt = total(i) * invlogit( mu +
         a_i(i) * bypass +
         y_re(t_i(i) , a_i(i) * t_bypass) +
         l_re(ll , a_i(i) * l_bypass) +
         j_re(jj , a_i(i) * j_bypass) +
         z_jl(ss, a_i(i) * jl_bypass) + //day X length
-        z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))); //day X length X year
-      
-      proj(a_i(i),mm) +=  wt;     // 
-      proj_y(a_i(i),mm,t_i(i)) +=  wt;     // 
-        // 
+        z_jlt(ss, a_i(i) * jlt_bypass, t_i(i))
+                                       ); //day X length X year
+
+      proj(a_i(i),mm) +=  wt;     //
+      proj_y(a_i(i),mm,t_i(i)) +=  wt;     //
+      //
       proj(2,mm) += (eta_i(i)) * total(i); //Why do this
     }
     a_total(a_i(i)) += total(i);
     ay_total(a_i(i),t_i(i)) += total(i);
-    
+
     nll(6) -= dbinom(surv(i),total(i),nu_i(i), true );
   }
   
@@ -374,7 +374,7 @@ template<class Type>
     }
     proj(2,mm) /= total.sum();
   }
-  
+
   for(int mm = 0; mm < m_imv(1); mm++){
     for(int aa = 0; aa < 2; aa++){
       for(int y = 0; y < n_t; y++){
@@ -412,7 +412,7 @@ template<class Type>
   REPORT(SigmaE);
   
   Type Range_raw_jl = sqrt(8.0) / exp( log_kappa_jl );
-
+  
   REPORT(Range_raw_jl);
   array<Type> mar_j(j_re.dim(0),2); 
   vector<int> j_int(3);
@@ -431,7 +431,7 @@ template<class Type>
     }
   }
   
-
+  
   array<Type> mar_l(l_re.dim(0),2); 
   vector<int> l_int(3);
   l_int << 36,22,8; //90% quantiles
@@ -454,20 +454,24 @@ template<class Type>
     for(int j = 0; j < y_re.dim(0); j++ ){
       if(y_re.dim(1)>1){
         mar_y(j,i) = log(invlogit(y_re(j,i) +
-          l_re(25) + //mean length
+          l_re(22) + //mean length
           j_re(40) + //mean arrival day
           mu + bypass * (i)));
       }else{
         mar_y(j,i) = log(invlogit(y_re(j,0) + //univariate year random effects
-          l_re(40) + //mean length
-          j_re(25) + //mean arrival day
+          l_re(22) + //mean length
+          j_re(40) + //mean arrival day
           mu + bypass * (i)));
       }
     }
   }
   
   Type tab_mu_a0 = log(invlogit(mu+l_re(22,0)+j_re(41,0)));
-  Type tab_mu_a1 = log(invlogit(mu+l_re(22,0)+j_re(39,1)));
+  Type tab_mu_a1 = log(invlogit(mu+l_re(22,0)+j_re(41,0)));
+  if(j_bypass==1){
+    tab_mu_a1 = log(invlogit(mu+l_re(22,0)+j_re(39,1)));
+  }
+  
   Type tab_mu = log(invlogit(mu));
   Type tab_tau = log(1/tau_jl2);
   Type tab_rho = log(Range_raw_jl);

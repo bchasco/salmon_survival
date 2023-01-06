@@ -99,7 +99,7 @@ for(bp in 1:nrow(bypass_mods)){
                      
                      loopnum = 1,
                      newstep = 1,
-                     H_flag = 0, #flag for anisotropy (0 = FALSE, 1 = TRUE)
+                     H_flag = 1, #flag for anisotropy (0 = FALSE, 1 = TRUE)
                      version = "v11_6", #model version
                      compare_AIC = FALSE, #compare the AIC to previous model runs
                      getsd = TRUE, #must be turned on for marginal plots, but turned off for management plots

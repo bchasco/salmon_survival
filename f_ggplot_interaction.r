@@ -4,9 +4,9 @@ f_ggplot_interaction <- function(fit = fit,
                                  save_to_file = FALSE,
                                  gg_ncol=2,
                                  arrange_ncol = 2,
-                                 bypass_cond = 2,
+                                 bypass_cond = 0,
                                  observed_max = 0.2,
-                                 plot_type = "Survival",
+                                 plot_type = "RE",
                                  include_data = TRUE){
 
   library(ggpubr)
@@ -34,23 +34,24 @@ f_ggplot_interaction <- function(fit = fit,
   DF <- data.frame(do.call(rbind,replicate(nt, vizloc_xy, simplify=FALSE)),
                    rep(1:nt+1997,each=nrow(vizloc_xy)))
   
-  DF$re <- c(apply(rep$z_jlt[,1,],2,function(x){return(x[knots_xy$nn.idx])}))
+  DF$re <- c(apply(rep$z_jlt[,bypass_cond+1,],2,function(x){return(x[knots_xy$nn.idx])}))
   
   yr_ef <- data.frame(y=1998:2019,
-                      ef=rep$y_re) #This mu is incorrect
+                      ef=rep$y_re[,bypass_cond+1]) 
   print(dim(DF))
   j_ef <- data.frame(j=min(df$j):max(df$j),
-                     ef=rep$j_re) #This mu is incorrect
+                     ef=rep$j_re[,bypass_cond+1]) 
   l_ef <- data.frame(l=min(df$l):max(df$l),
-                     ef=rep$l_re) #This mu is incorrect
+                     ef=rep$l_re[,bypass_cond+1]) 
+  print(l_ef)
   
   names(DF) <- c("x","y","tt",'R.E.')
   DF$mu <- unlist(rep['mu'])
-  DF$yr <- yr_ef[match(DF$tt,yr_ef$y),2:ncol(yr_ef)]
-  DF$j <- j_ef[match(round(DF$x),j_ef$j),2:ncol(j_ef)]
-  DF$l <- l_ef[match(round(DF$y),l_ef$l),2:ncol(l_ef)]
-  DF$noRE <- (DF$mu+as.matrix(DF$yr)+as.matrix(DF$j)+as.matrix(DF$l))
-  DF$Survival <- (DF$mu+as.matrix(DF$yr)+as.matrix(DF$j)+as.matrix(DF$l) + rep(DF$R.E.))
+  DF$yr <- yr_ef[match(DF$tt,yr_ef$y),'ef']
+  DF$j <- j_ef[match(round(DF$x),j_ef$j),'ef']
+  DF$l <- l_ef[match(round(DF$y),l_ef$l),'ef']
+  DF$noRE <- (DF$mu+ DF$yr + DF$j + DF$l)
+  DF$Survival <- (DF$mu+ DF$yr + DF$j +DF$l + rep(DF$R.E.))
 
   DF2 <- data.frame(x=data$j_i+min(df$j),
                     y=data$l_i+min(df$l),
@@ -69,7 +70,7 @@ f_ggplot_interaction <- function(fit = fit,
   p1 <- ggplot(data = DF[DF$tt%in%sampleYears,],
                aes(x = as.Date(x, origin = as.Date("2018-01-01")),
                    y = y,
-                   fill = plogis(Survival[,bypass_cond])/plogis(noRE[,bypass_cond])*100)) +
+                   fill = plogis(Survival)/plogis(noRE)*100)) +
     geom_raster()+
     facet_wrap(~tt, ncol=gg_ncol) +
     ylab('Length (mm)') +
@@ -94,7 +95,7 @@ f_ggplot_interaction <- function(fit = fit,
   breaks <- c(min_surv, mid_surv, max_surv)
   print(breaks)
   p2 <- ggplot(data = DF[DF$tt%in%sampleYears,], aes(x = as.Date(x, origin = as.Date("2018-01-01")), y = y,
-                                                     fill = plogis(Survival[,bypass_cond]))) +
+                                                     fill = plogis(Survival))) +
     geom_raster()+
     facet_wrap(~tt, ncol=gg_ncol) +
     ylab('Length (mm)') +
@@ -157,18 +158,18 @@ f_ggplot_interaction <- function(fit = fit,
       plotlist <- list(p1,p2,p3)
   }
 
-  # p <- ggarrange(plotlist = plotlist,
-  #                labels = LETTERS[1:length(plotlist)],
-  #                ncol = length(plotlist))
-  # 
-  # # Annotate the figure by adding a common labels
-  # annotate_figure(p,
-  #                 bottom = text_grob("Migration date past Lower Granite Dam", color = "black",
-  #                                    hjust = 1, x = 0.65, size = 11))
-  # 
-  print(p3)
+  p <- ggarrange(plotlist = plotlist,
+                 labels = LETTERS[1:length(plotlist)],
+                 ncol = length(plotlist))
+
+  # Annotate the figure by adding a common labels
+  annotate_figure(p,
+                  bottom = text_grob("Migration date past Lower Granite Dam", color = "black",
+                                     hjust = 1, x = 0.65, size = 11))
+
+  print(p)
   if(save_to_file) png(file, height=500, width=700, pointsize = 12)
-  print(p3)
+  print(p)
   if(save_to_file) dev.off()
   
   # print(p1)

@@ -13,12 +13,12 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
   
   library(raster)
   library(RANN)
-
+  
   for(i in 1:dim(mesh$tmb_proj)[2]){
     mesh$tmb_proj[,i,'l'] <- mesh$tmb_proj[,i,'l'] - min(rangeL)
     mesh$tmb_proj[,i,'j'] <- mesh$tmb_proj[,i,'j'] - min(rangeJ)
   }
-    
+  
   data <- list(n_i = nrow(df)
                ,a_i = df$a
                ,t_AR = AR_flags["t_AR"]
@@ -82,7 +82,7 @@ f_TMB_data_pars <- function(df = 0, #pass the raw data
     ,f_psijl = 0
     ,f_psijlt = 0
   )
-
+  
   return(list(data = data,
               parameters = parameters))    
 }  
